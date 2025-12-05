@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Crimson Sovereignty | Varrick's Iron Horde</title>
+<style>
+    /* --- FONTS & COLORS --- */
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=IM+Fell+English:ital@0;1&family=UnifrakturMaguntia&display=swap');
+
+    :root {
+        --bg-color: #0d0d0d;
+        --text-color: #2b1d0e;
+        --accent-color: #660000; /* Blood Red */
+        --accent-glow: rgba(255, 50, 50, 0.5);
+        --parchment-bg: #d4c5a9;
+        --gold-accent: #8b5a2b;
+        --ui-glow: rgba(255, 0, 0, 0.7); /* NEW: Runic glow from UI Kit */
+    }
+
+    /* --- CUSTOM SCROLLBAR --- */
+    ::-webkit-scrollbar {
+        width: 12px;
+        background-color: #1a1a1a;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: #444;
+        border: 2px solid #1a1a1a;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--accent-color);
+    }
+    
+    /* --- VIDEO BACKGROUND --- */
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -100;
+        filter: brightness(0.4) contrast(1.2);
+    }
+
+    /* --- MOBILE MENU TOGGLE --- */
+    .mobile-menu-toggle {
+        display: none;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.9);
+        border: 2px solid var(--accent-color);
+        color: var(--parchment-bg);
+        font-size: 24px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 1002;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+    
+    .mobile-menu-toggle:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+    }
+    
+    .mobile-menu-toggle.active {
+        background: var(--accent-color);
+    }
+
+    /* --- VOLUME CONTROL --- */
+    .volume-control {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid var(--accent-color);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 0 20px var(--accent-glow);
+        backdrop-filter: blur(10px);
+    }
+
+    .volume-control label {
+        color: #bfbfbf;
+        font-family: 'Cinzel', serif;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .volume-slider {
+        width: 100px;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.2);
+        outline: none;
+        border-radius: 2px;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: var(--accent-color);
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .volume-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: var(--accent-color);
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .volume-icon {
+        color: #bfbfbf;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .volume-icon:hover {
+        color: var(--accent-color);
+        text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    .volume-icon.muted {
+        color: #666;
+    }
+    
+    /* --- CORE LAYOUT --- */
+    body {
+        /* UPDATED: Background inspired by image_6756fe.png (red grunge) */
+        background-color: var(--bg-color);
+        background-image: 
+            radial-gradient(ellipse at top, rgba(50, 0, 0, 0.7) 0%, rgba(13, 13, 13, 1) 70%), 
+            url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a1a1a' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-attachment: fixed;
+        font-family: 'IM Fell English', serif;
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    /* --- NAVIGATION --- */
+    nav {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        /* UPDATED: nav style for a 'glass' effect */
+        background: rgba(10, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 3px solid var(--accent-color);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        padding: 15px 0;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.8), 0 0 10px var(--accent-glow); /* Added glow */
+    }
+
+    nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    nav li {
+        margin: 0 10px;
+    }
+
+    nav a {
+        text-decoration: none;
+        color: #bfbfbf;
+        font-family: 'Cinzel', serif;
+        font-size: 1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        padding: 5px 10px;
+        display: inline-block;
+        text-shadow: 0 0 3px rgba(0,0,0,0.5); /* Added subtle shadow */
+    }
+
+    nav a:hover, nav a.active {
+        color: #ff3333;
+        text-shadow: 0 0 10px var(--ui-glow), 0 0 5px var(--ui-glow); /* UPDATED: Brighter glow */
+    }
+
+    /* DISCORD BUTTON */
+    .discord-btn {
+        /* UPDATED: Style from UI Kit image_675641.png */
+        background: rgba(0,0,0,0.5);
+        color: white !important;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-family: 'Cinzel', serif; /* Match other buttons */
+        border: 1px solid #5865F2;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 5px rgba(88, 101, 242, 0.8);
+        box-shadow: 0 0 10px rgba(88, 101, 242, 0.6), inset 0 0 5px rgba(88, 101, 242, 0.3);
+    }
+    .discord-btn:hover {
+        background: rgba(88, 101, 242, 0.2);
+        box-shadow: 0 0 15px rgba(88, 101, 242, 0.8), inset 0 0 8px rgba(88, 101, 242, 0.5);
+        transform: translateY(-2px);
+    }
+
+    /* --- MAIN CONTAINER --- */
+    .container {
+        max-width: 900px;
+        margin: 120px auto 60px;
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* --- CONTENT SECTIONS (Tabs) --- */
+    .content-section {
+        display: none;
+        animation: fadeIn 0.8s ease;
+        width: 100%;
+    }
+    .content-section.active {
+        display: block;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- PARCHMENT STYLING --- */
+    .parchment {
+        background-color: var(--parchment-bg);
+        background-image: 
+            linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0) 10%, rgba(0,0,0,0) 90%, rgba(0,0,0,0.05)),
+            url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        padding: 60px;
+        /* UPDATED: Glowing border effect from UI Kit */
+        box-shadow: 
+            0 10px 40px rgba(0,0,0,0.9),
+            inset 0 0 80px rgba(139, 90, 43, 0.3),
+            inset 0 0 20px rgba(0,0,0,0.3),
+            0 0 8px var(--accent-color); /* Outer glow */
+        border-radius: 3px;
+        position: relative;
+        margin-bottom: 40px;
+        border: 1px solid var(--accent-color); /* Runic border */
+    }
+    
+    .parchment::before {
+        /* UPDATED: Glowing inner border */
+        content: "";
+        position: absolute;
+        top: 5px; left: 5px; right: 5px; bottom: 5px;
+        border: 1px solid rgba(255, 0, 0, 0.5);
+        pointer-events: none;
+        box-shadow: 0 0 10px var(--accent-glow);
+        opacity: 0.7;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-family: 'UnifrakturMaguntia', cursive;
+        text-align: center;
+        font-size: 3.5em;
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: var(--accent-color);
+        /* UPDATED: Enhanced glow */
+        text-shadow: 2px 2px 2px #000, 0 0 15px var(--ui-glow), 0 0 5px var(--ui-glow);
+        border-bottom: 3px solid var(--accent-color);
+        box-shadow: 0 5px 10px -5px var(--accent-glow); /* Glow for the border */
+        padding-bottom: 20px;
+    }
+
+    h2 {
+        font-family: 'Cinzel', serif;
+        text-align: center;
+        font-size: 1.8em;
+        color: #1a1a1a;
+        margin-top: 40px;
+        /* UPDATED: Runic divider style */
+        border-bottom: 1px solid var(--accent-color);
+        text-shadow: 0 0 5px var(--accent-glow);
+        box-shadow: 0 3px 5px -3px var(--accent-glow);
+        padding-bottom: 10px;
+    }
+    
+    h3 {
+        font-family: 'Cinzel', serif;
+        font-size: 1.3em;
+        color: var(--accent-color);
+        margin-top: 25px;
+        border-bottom: 1px dashed rgba(139, 90, 43, 0.5);
+        padding-bottom: 5px;
+        text-shadow: 0 0 3px var(--accent-glow); /* Added glow */
+    }
+
+    p, li {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    
+    /* --- SPECIAL BIBLE STYLING --- */
+    .drop-cap {
+        float: left;
+        font-family: 'UnifrakturMaguntia', cursive;
+        font-size: 4em;
+        line-height: 0.8;
+        padding-right: 8px;
+        padding-left: 3px;
+        color: var(--accent-color);
+        text-shadow: 0 0 5px var(--accent-glow); /* Added glow */
+    }
+    .bible-chapter {
+        text-align: center;
+        font-family: 'Cinzel', serif;
+        font-size: 1.1em;
+        color: #555;
+        margin-top: 60px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        border-top: 2px double #8b5a2b;
+        padding-top: 20px;
+        font-weight: bold;
+    }
+    .bible-title {
+        text-align: center;
+        font-weight: bold;
+        font-style: italic;
+        color: var(--accent-color);
+        margin-bottom: 20px;
+        font-size: 1.4em;
+    }
+    .signature {
+        font-family: 'Cinzel', serif;
+        font-style: italic;
+        text-align: right;
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 0.9em;
+        color: #4a0404;
+    }
+    .letter-box {
+        border: 1px dashed var(--gold-accent);
+        background: rgba(0,0,0,0.03);
+        padding: 15px 20px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border-radius: 3px;
+    }
+    .letter-box p {
+        font-size: 1.1em;
+        font-style: italic;
+    }
+
+    /* ROLE CARD STYLE */
+    .role-card {
+        border: 1px solid var(--gold-accent);
+        background: rgba(255, 255, 255, 0.3);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        transition: all 0.3s ease-out;
+    }
+    .role-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        /* UPDATED: Red glow on hover */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 10px var(--accent-glow);
+    }
+    
+    /* ENEMY CARD STYLE */
+    .enemy-card {
+        border: 1px solid #4a0404;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        transition: all 0.3s ease-out;
+    }
+    .enemy-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        /* UPDATED: Red glow on hover */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 10px var(--accent-glow);
+    }
+
+    /* LOCATION CARD STYLE */
+    .location-card {
+        border: 1px solid rgba(102, 0, 0, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        transition: all 0.3s ease-out;
+    }
+    .location-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        /* UPDATED: Red glow on hover */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 10px var(--accent-glow);
+    }
+
+    /* --- COPY BOX STYLE --- */
+    .template-box {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 20px;
+        border: 1px dashed #5c4033;
+        border-radius: 4px;
+        font-family: 'Courier New', Courier, monospace;
+        white-space: pre-wrap;
+        text-align: left;
+        font-size: 0.9em;
+        color: #000;
+        margin-bottom: 20px;
+    }
+
+    .copy-btn {
+        font-family: 'Cinzel', serif;
+        font-size: 1.2em;
+        color: #fff;
+        /* UPDATED: Style from UI Kit image_675641.png */
+        background: rgba(0,0,0,0.5);
+        padding: 10px 25px;
+        border: 1px solid var(--accent-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 5px var(--ui-glow);
+        box-shadow: 0 0 10px var(--accent-glow), inset 0 0 5px rgba(255,0,0,0.3);
+    }
+    .copy-btn:hover {
+        background: rgba(102, 0, 0, 0.2); /* Dark red translucent */
+        box-shadow: 0 0 15px var(--ui-glow), inset 0 0 8px rgba(255,0,0,0.5);
+        transform: translateY(-2px);
+    }
+
+    /* --- DECORATIVE STAINS --- */
+    .stain {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(139,69,19,0.1) 0%, rgba(139,69,19,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(20px);
+        mix-blend-mode: multiply;
+        z-index: 0;
+        opacity: 0.8;
+    }
+
+    /* --- FOOTER --- */
+    footer {
+        text-align: center;
+        color: #666;
+        font-family: 'Cinzel', serif;
+        padding: 20px;
+        font-size: 0.8em;
+        margin-top: 40px;
+        border-top: 1px solid #333; /* Added divider */
+    }
+    /* ================================
+       ATMOSPHERIC BACKGROUND ENGINE
+       ================================ */
+    #atmos-engine {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        z-index: -10;
+        pointer-events: none;
+    }
+
+    /* --- RED FOG LAYERS --- */
+    .fog-layer {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+        background: radial-gradient(circle, rgba(255,40,40,0.33) 0%, rgba(100,0,0,0.15) 40%, rgba(0,0,0,0) 80%);
+        filter: blur(80px);
+        animation: fogMove 70s linear infinite;
+    }
+
+    .fog1 { animation-duration: 80s; opacity: 0.40; }
+    .fog2 { animation-duration: 120s; opacity: 0.25; }
+    .fog3 { animation-duration: 160s; opacity: 0.18; }
+
+    @keyframes fogMove {
+        0%   { transform: translate(0px, 0px) scale(1.1); }
+        50%  { transform: translate(-300px, -200px) scale(1.2); }
+        100% { transform: translate(0px, 0px) scale(1.1); }
+    }
+
+    /* --- FLOATING EMBERS --- */
+    #ember-canvas {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* --- SLOW MOVING SOFT SHADOW WAVES --- */
+    .shadow-wave {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0,0,0,0.25), rgba(0,0,0,0) 70%);
+        opacity: 0.15;
+        animation: shadowMove 90s ease-in-out infinite;
+    }
+
+    @keyframes shadowMove {
+        0%   { transform: translate(-10%, -10%) scale(1.1); }
+        50%  { transform: translate(10%, 20%) scale(1.2); }
+        100% { transform: translate(-10%, -10%) scale(1.1); }
+    }
+
+    /* --- OCCASIONAL RED LIGHTNING PULSE --- */
+    .red-pulse {
+        position: absolute;
+        inset: 0;
+        background: rgba(255,30,30,0.15);
+        opacity: 0;
+        animation: pulseFlash 12s infinite;
+    }
+
+    @keyframes pulseFlash {
+        0%, 95%, 100% { opacity: 0; }
+        96% { opacity: 0.18; }
+        97% { opacity: 0.08; }
+        98% { opacity: 0.16; }
+    }
+#tribute-bell-toggle button {
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: 1px solid rgba(255,50,50,0.6);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* --- MOBILE RESPONSIVE DESIGN --- */
+@media (max-width: 768px) {
+    /* Mobile menu toggle visible */
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    /* Navigation adjustments */
+    nav {
+        padding: 0;
+        flex-wrap: nowrap;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: rgba(10, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-right: 3px solid var(--accent-color);
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: auto;
+        transition: left 0.3s ease;
+        z-index: 1001;
+        padding: 60px 20px 20px;
+    }
+    
+    nav.active {
+        left: 0;
+    }
+    
+    nav ul {
+        flex-wrap: nowrap;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 0;
+        width: 100%;
+    }
+    
+    nav ul li {
+        margin: 0 0 5px 0;
+        width: 100%;
+    }
+    
+    nav ul li a {
+        font-size: 14px;
+        padding: 12px 15px;
+        white-space: nowrap;
+        display: block;
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid rgba(102, 0, 0, 0.3);
+        transition: all 0.3s;
+    }
+    
+    nav ul li a:hover {
+        background: rgba(102, 0, 0, 0.3);
+        padding-left: 20px;
+    }
+    
+    nav ul li button {
+        font-size: 12px;
+        padding: 10px 15px;
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid rgba(102, 0, 0, 0.3);
+        margin-top: 10px;
+    }
+    
+    nav ul li button:hover {
+        background: rgba(102, 0, 0, 0.3);
+        padding-left: 20px;
+    }
+    
+    /* Volume control adjustments */
+    .volume-control {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 12px;
+    }
+    
+    .volume-icon {
+        font-size: 16px;
+        margin-right: 8px;
+    }
+    
+    .volume-slider {
+        width: 100px;
+    }
+    
+    /* Mobile reading optimizations */
+    .content-section {
+        margin-top: 70px; /* Space for hamburger menu */
+        padding: 0;
+    }
+    
+    /* Parchment adjustments */
+    .parchment {
+        padding: 25px 18px;
+        margin: 10px 5px;
+        border-radius: 5px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+    }
+    
+    /* Typography adjustments for better mobile reading */
+    .parchment h1 {
+        font-size: 26px;
+        margin-bottom: 18px;
+        line-height: 1.3;
+    }
+    
+    .parchment h2 {
+        font-size: 20px;
+        margin-top: 20px;
+        line-height: 1.4;
+    }
+    
+    .parchment h3 {
+        font-size: 17px;
+        line-height: 1.4;
+    }
+    
+    .parchment h4 {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+    
+    .parchment p, .parchment li {
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 12px;
+        text-align: justify;
+    }
+    
+    /* Better mobile readability */
+    .parchment {
+        font-family: 'IM Fell English', serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Role card adjustments */
+    .role-card {
+        margin: 15px 0;
+        padding: 20px;
+    }
+    
+    .role-card h3 {
+        font-size: 16px;
+    }
+    
+    /* Enemy card adjustments */
+    .enemy-card {
+        margin: 15px 0;
+        padding: 20px;
+    }
+    
+    .enemy-card h3 {
+        font-size: 16px;
+    }
+    
+    /* Form adjustments */
+    input, textarea, select {
+        font-size: 14px;
+        padding: 8px;
+    }
+    
+    button {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+    
+    /* Canvas adjustments */
+    #ember-canvas {
+        opacity: 0.3;
+    }
+    
+    /* Section spacing */
+    .content-section {
+        margin-top: 60px;
+    }
+}
+
+/* Mobile overlay for menu */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+@media (max-width: 480px) {
+    /* Extra small mobile adjustments */
+    .mobile-menu-toggle {
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        padding: 6px 10px;
+    }
+    
+    nav {
+        width: 85%;
+        padding: 50px 15px 15px;
+    }
+    
+    nav ul li a {
+        font-size: 13px;
+        padding: 10px 12px;
+    }
+    
+    nav ul li button {
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+    
+    .volume-control {
+        bottom: 5px;
+        right: 5px;
+        padding: 6px 10px;
+    }
+    
+    .volume-icon {
+        font-size: 14px;
+        margin-right: 6px;
+    }
+    
+    .volume-slider {
+        width: 80px;
+    }
+    
+    .content-section {
+        margin-top: 60px;
+    }
+    
+    .parchment {
+        padding: 20px 12px;
+        margin: 5px 3px;
+        border-radius: 4px;
+    }
+    
+    .parchment h1 {
+        font-size: 22px;
+        line-height: 1.3;
+        margin-bottom: 15px;
+    }
+    
+    .parchment h2 {
+        font-size: 18px;
+        line-height: 1.4;
+        margin-top: 15px;
+    }
+    
+    .parchment h3 {
+        font-size: 16px;
+        line-height: 1.4;
+    }
+    
+    .parchment p, .parchment li {
+        font-size: 14px;
+        line-height: 1.6;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+    
+    .role-card {
+        margin: 10px 0;
+        padding: 15px;
+    }
+    
+    .enemy-card {
+        margin: 10px 0;
+        padding: 15px;
+    }
+    
+    input, textarea, select {
+        font-size: 13px;
+        padding: 6px;
+    }
+    
+    button {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+}
+
+/* --- TABLET RESPONSIVE DESIGN --- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .parchment {
+        padding: 40px 30px;
+        margin: 20px;
+    }
+    
+    .parchment h1 {
+        font-size: 32px;
+    }
+    
+    .parchment h2 {
+        font-size: 24px;
+    }
+    
+    .parchment h3 {
+        font-size: 20px;
+    }
+    
+    nav ul li a {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .volume-control {
+        padding: 10px 15px;
+    }
+    
+    .volume-slider {
+        width: 120px;
+    }
+}
+/* Custom Image Map */
+.world-map-container {
+  max-width: 1100px;
+  margin: 20px auto;
+  text-align: center;
+  color: #f3e6e1;
+}
+
+.map-title {
+  font-family: "Cinzel", serif;
+  margin-bottom: 6px;
+}
+
+.map-sub {
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+
+.map-image-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+}
+
+.map-image-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Hotspots */
+.map-hotspot {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: rgba(200,0,0,0.85);
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px rgba(255,0,0,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.map-hotspot:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 22px rgba(255,0,0,0.8);
+}
+
+/* Info Panel */
+.map-info-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  max-height: 60vh;
+  background: #120d0d;
+  padding: 20px;
+  border-top: 2px solid #7a0000;
+  color: #e9dcd3;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 9999;
+}
+
+.map-info-panel.show {
+  transform: translateY(0%);
+}
+
+.map-info-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 18px;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#map-info-title {
+  font-family: "Cinzel", serif;
+  margin-top: 0;
+}
+
+</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+
+    <!-- VIDEO BACKGROUND -->
+    <video class="video-background" id="bg-video" autoplay muted loop>
+        <source src="background_video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- NEW BACKGROUND MUSIC -->
+    <audio id="background-music" src="BackGroundMusic01.mp3" loop preload="auto" autoplay></audio>
+
+<div id="atmos-engine">
+        <div class="fog-layer fog1"></div>
+        <div class="fog-layer fog2"></div>
+        <div class="fog-layer fog3"></div>
+
+        <canvas id="ember-canvas"></canvas>
+        <div class="shadow-wave"></div>
+        <div class="red-pulse"></div>
+    </div>
+
+
+<!-- VOLUME CONTROL -->
+<div class="volume-control">
+    <span class="volume-icon" id="volume-icon" onclick="toggleMute()">🔊</span>
+    <label for="volume-slider">Volume</label>
+    <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="30" oninput="changeVolume(this.value)">
+    <span id="volume-value">30%</span>
+</div>
+
+<!-- MOBILE MENU TOGGLE -->
+<button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+
+<!-- MOBILE OVERLAY -->
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+<!-- NAVIGATION MENU -->
+<nav>
+    <ul>
+        <li><a href="javascript:void(0)" onclick="showSection('home')" id="nav-home" class="active">The Spire</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('code')" id="nav-code">Rules</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('lore')" id="nav-lore">Lore</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('locations')" id="nav-locations">Locations</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('bible')" id="nav-bible">Crimson Bible</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('roles')" id="nav-roles">Ranks</a></li>
+        <li><a href="javascript:void(0)" onclick="showSection('template')" id="nav-template">OC Template</a></li>
+	<li><a href="javascript:void(0)" onclick="showSection('tribute')" id="nav-tribute">Tribute</a></li>
+	<li><a href="javascript:void(0)" onclick="showSection('contribute')" id="nav-contribute">Contribute</a></li>
+        <li id="tribute-bell-toggle"><button onclick="toggleMusic()">🔇 Background Music</button></li>
+        <!-- FIXED: Corrected broken httpsis:// link -->
+        <li><a href="https://discord.gg/dVZTK3Jdkn" target="_blank" class="discord-btn">JOIN DISCORD</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+
+    <!-- SECTION 1: HOME -->
+    <div id="home" class="content-section active">
+        <div class="parchment">
+            <div class="stain" style="top: -50px; right: -50px;"></div>
+            <h1>The Crimson Sovereignty</h1>
+            <p style="text-align: center; font-size: 1.4em; font-style: italic;">"The Sun is a tyrant. I shall dethrone it."</p>
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+            
+            <p>Welcome, traveler. You have stepped out of the light and into the shadow of <strong>Count Varrick von Kaelen</strong>.</p>
+            
+            <p>We are a structured, high-quality <strong>Dark Fantasy RP group</strong> in VRChat, set in <strong>12th Century Germany</strong>. We are not a rabble; we are the <strong>Iron Horde</strong>, sworn to a single, sacred mission: the conquest of the Sun.</p>
+
+            <h2>Our Philosophy</h2>
+            <ul>
+                <li><strong>Strategy Over Slaughter:</strong> We focus on covert acquisition and strategic sabotage, not mindless deathmatch.</li>
+                <li><strong>Absolute Hierarchy:</strong> Varrick's word is law. There is no political mess, only directed action.</li>
+                <li><strong>Lore-Driven:</strong> Every event serves the 800-year-old plot to secure the <strong>Nine Runics</strong>.</li>
+            </ul>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="https://discord.gg/dVZTK3Jdkn" target="_blank" class="copy-btn" style="text-decoration: none;">JOIN THE DISCORD</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: RULES -->
+    <div id="code" class="content-section">
+        <div class="parchment">
+            <h1>The Sovereign's Code</h1>
+            <h2>Law of the Spire</h2>
+            
+            <div style="border: 1px solid #660000; background: rgba(102, 0, 0, 0.1); padding: 15px; margin-bottom: 20px; border-radius: 4px; box-shadow: 0 0 10px var(--accent-glow);">
+                <p><strong>DISCLAIMER:</strong> We operate on a <strong>3-Strike System</strong>. Violations result in Exile. Zero tolerance for hate speech or vile acts.</p>
+                <ul style="margin-top: 5px;">
+                    <li>Each Violation results in +1 Strike.</li>
+                    <li>3 Strikes results in <strong>Exile (Kick)</strong> from the Spire for 1 month.</li>
+                    <li>If you return and receive another strike during your probationary month, the penalty escalates to a longer Exile or <strong>Permanent Erasure (Ban)</strong>, depending on the severity.</li>
+                    <li><strong>Redemption:</strong> One strike will be removed from your record every 2 months of loyal, rule-abiding service.</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>ZERO TOLERANCE:</strong><br>
+                Using slurs or hate speech during events or within the Spire is strictly forbidden and may result in immediate <strong>Exile, Erasure, or Blacklisting</strong>.<br>
+                Any discussion or sharing of inappropriate content is anathema to the Bloodline. These offenses result in an <strong>Instant Ban and Blacklist</strong>.</p>
+            </div>
+
+            <h3>1. The Maturity of the Bloodline (Age 16+)</h3>
+            <p>The age requirement for this Sovereignty is 16. Exceptions may be made for those who display wisdom beyond their years. If you possess the cunning to deceive us about your age and we do not suspect you are younger, you likely possess the maturity required to serve. <em>Members already sworn to the Spire who are under 16 are exempt from this edict.</em></p>
+
+            <h3>2. Unity of the Horde (Respect & Kindness)</h3>
+            <p>Treat your fellow kin with respect. The Spire is a sanctuary for our kind to revel in our dark purpose, both in and out of roleplay. <strong>Discrimination and bigotry</strong> (homophobia, transphobia, racism, etc.) are the tools of the weak and will <strong>never</strong> be tolerated. Harassment of any sworn member is an act of treason.</p>
+
+            <h3>3. Decorum of the Court (No Obscene Content)</h3>
+            <p>While our lore touches upon dark themes (such as the Womb of Despair), do not speak of inappropriate activities or make excessive references that disturb the comfort of the Court. <strong>Posting obscene videos or images is forbidden.</strong> Keep such things outside the Spire's walls, especially given the younger initiates among us.</p>
+
+            <h3>4. Obey the Chain of Command (Listen to Staff)</h3>
+            <p>The <strong>Butlers (Admins)</strong> have full discretion over enforcing the Count's will. If a Butler commands you to cease an action, <strong>stop immediately</strong>. They exist to ensure the Edicts are upheld and that our conquests flow smoothly. You must also heed the <strong>Iron Core (Knights/Mods)</strong>—they are the enforcers of the rules and speak with the authority of the leadership.</p>
+
+            <h3>5. Laws of the Aether (Discord ToS)</h3>
+            <p>This is vital. Do not commit any act that would bring the wrath of the platform upon us. Follow <strong>Discord's Terms of Service</strong>. This includes <strong>no doxxing</strong> and no exchange of pirated materials.</p>
+
+            <h3>6. Silence in the Ranks (No Personal Drama)</h3>
+            <p>Do not bring personal feuds into the Spire. Doing so only spreads chaos among the Horde. If you have a grievance with another member, bring it quietly to a <strong>Butler</strong>, and do not drag the entire Sovereignty into your dispute. Speak to us if you have been made uncomfortable or disrespected, but do not make a spectacle of it.</p>
+
+            <h3>7. The Spirit of the Edict (No Loopholes)</h3>
+            <p>Do not attempt to outwit the law. Searching for loopholes will result in the same punishment as breaking the rule you sought to bypass. Use your <strong>common sense</strong>. If you suspect an action violates the spirit of the Count's law, <strong>DO NOT DO IT</strong>.</p>
+
+            <h3>8. The Duty of Vigilance (Report Violations)</h3>
+            <p>We cannot watch every shadow. We do not wish to hover over you like a paranoid jailer. However, the Edicts exist for the survival of the group. If you witness a breach of the law, <strong>you must inform us.</strong> Confidentiality is guaranteed. This is not an invitation to spy on your brethren, but a request to protect the integrity of the Spire. <em>Proof is required: video for VRChat incidents, screenshots for Discord.</em> Send this proof directly to a <strong>Butler or Officer</strong>.</p>
+
+            <h3>9. The Joy of Conquest (HAVE FUN!)</h3>
+            <p>The most vital rule: <strong>Enjoy the Darkness.</strong> We are strict when necessary, but our ultimate goal is the enjoyment of the narrative and the company of the Horde. As long as you follow these Edicts, you are safe under the Count's patronage. We are here to relax and conquer together. May you find a second family within these walls.</p>
+        </div>
+    </div>
+
+    <!-- SECTION 3: LORE -->
+    <div id="lore" class="content-section">
+        <div class="parchment">
+            <div class="stain" style="bottom: 10%; left: 10%;"></div>
+            <h1>The Crimson Bible</h1>
+            <h2>I. The Origin (1120–1155 AD)</h2>
+            <p>Before he was the Sovereign, he was <strong>Graf Varrick von Kaelen</strong>, a feared noble of the Black Forest. Betrayed by the Prince-Bishop of Mainz and chained to a spire at sunrise, he burned for six hours but refused to die. He vowed to consume the sun that tried to execute him.</p>
+
+            <h2>II. The Unification of the Horde</h2>
+            <p><strong>The Orcs (Iron-Blood Clan):</strong> Betrayed mercenaries from the Harz Mountains. Varrick bought their loyalty with the heads of the Imperial Guard.</p>
+            <p><strong>The Ogres (Alp-Walkers):</strong> Massive brutes tamed by Varrick's steady supply of food. Living siege engines.</p>
+            <p><strong>The Goblins (Rhine-Rats):</strong> Masters of the Cologne sewers, saved from drowning by Varrick's ice magic. Spies and thieves.</p>
+            
+            <h3>The Deep Crawlers</h3>
+            <p><strong>The Brood Weavers (Net-Spinners):</strong> Monstrous, crystal-backed arachnids found in the deepest silver mines of the Black Forest. Varrick fed them runic-infused flesh, turning their webs into steel-hard traps. They serve as ambush predators.</p>
+
+            <h3>The Experiments of Flesh</h3>
+            <p><strong>Rat Ogres (The Flesh-Molded):</strong> Created in Varrick's labs using alchemy stolen from the University of Heidelberg. Twisted mutations of man and beast, fueled by "Vitalis Glass." They are <strong>Shock Troops</strong>, unleashed to break enemy lines.</p>
+            <p><strong>Dark Demonic Monsters:</strong> Creatures summoned from the "Hexen-Void," ancient pagan spirits bound to Varrick's will. They are used as <strong>Terror Weapons</strong>.</p>
+
+            <h3>The Skyline Terror</h3>
+            <p><strong>The Desmodus (Nacht-Flügel):</strong> Ancient bats discovered in the caves of the <strong>Swabian Jura</strong>. Varrick woke them with blood rituals. They provide <strong>Aerial Superiority</strong> over the dense forests.</p>
+
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <img src="DesmodusNotes.png" alt="Desmodus Notes" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid var(--accent-color);">
+                <p style="font-style: italic; color: #8b5a2b; margin-top: 10px;">Field Notes on the Desmodus</p>
+            </div>
+            <h3>The Risen & The Ancient</h3>
+            <p><strong>Undead Knights (The Teutonic Fallen):</strong> Corpses of fallen Teutonic Knights raised to serve. They wear heavy, alchemically treated black plate armor. They are the <strong>Elite Heavy Infantry</strong>, mocking the holy order they once served.</p>
+            <p><strong>Ancient Stone Protectors (The Roman Golems):</strong> Relics left behind by the Roman Empire's occupation of Germania. Varrick has dug them up and <strong>reprogrammed</strong> them with dark magic. They guard the Runics.</p>
+
+            <h3>The Chill of the North</h3>
+            <p><strong>The Night Walkers (The Frost-Bound):</strong> Spirits from the frozen northern coasts of the Baltic. They seek an eternal winter. Varrick uses their power to counter the fires of the Inquisition. They serve as <strong>Generals of the Dead</strong>.</p>
+
+            <h3>The Apex Predators (The Dragons)</h3>
+            <p><strong>The Ember Trinity:</strong> Three dragons hatched in the <strong>Sun-Eater's Crucible</strong>, hidden deep in the Black Forest.</p>
+            <ul>
+                <li><strong>Malachor (The Black):</strong> The Terror of the Rhine.</li>
+                <li><strong>Vorith (The Green):</strong> The Poison of the Forest.</li>
+                <li><strong>Ignis (The Red):</strong> The Sovereign's Mount.</li>
+            </ul>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>III. The Geography of Shadow</h2>
+            <p><strong>The Schwarzwald Spire (The Needle):</strong> Varrick's fortress, hidden in the densest part of the <strong>Black Forest</strong>, shrouded in perpetual mist. It houses the <strong>Prism Chamber</strong> aimed at the grey German sky.</p>
+            <p><strong>The Enemy Lands:</strong> The <strong>Cathedral of Light</strong> (Inquisition) in Cologne guarding the "Sun-Shard," and the <strong>Iron Pass</strong> in the Alps controlled by mercenary armies.</p>
+        </div>
+    </div>
+    
+    <!-- SECTION: LOCATIONS (NEW) -->
+    <div id="locations" class="content-section">
+<!-- BEGIN: CUSTOM IMAGE WORLD MAP -->
+<div id="world-map-container" class="world-map-container">
+  <h2 class="map-title">Atlas of the Crimson Sovereignty</h2>
+  <p class="map-sub">Tap / Click a symbol to learn more.</p>
+
+  <div class="map-image-wrapper">
+    <!-- Replace the src filename with your own map image -->
+    <img id="custom-world-map" src="germania.jfif" alt="World map">
+
+    <!-- Hotspots positioned in percentages -->
+    <div class="map-hotspot" style="left:44%; top:28%;" data-name="The Spire"></div>
+    <div class="map-hotspot" style="left:46%; top:33%;" data-name="Prism Chamber"></div>
+    <div class="map-hotspot" style="left:45%; top:36%;" data-name="Great Hearth"></div>
+    <div class="map-hotspot" style="left:29%; top:30%;" data-name="Blackwood Forest"></div>
+    <div class="map-hotspot" style="left:35%; top:48%;" data-name="Ruined Chapel of St. Ilias"></div>
+    <div class="map-hotspot" style="left:38%; top:66%;" data-name="Sun-Eater's Crucible"></div>
+    <div class="map-hotspot" style="left:72%; top:53%;" data-name="Iron Pass"></div>
+    <div class="map-hotspot" style="left:75%; top:24%;" data-name="Monastery of the White Sun"></div>
+    <div class="map-hotspot" style="left:60%; top:45%;" data-name="Silver Market"></div>
+  </div>
+</div>
+
+<!-- Map popup panel -->
+<div id="map-info-panel" class="map-info-panel">
+  <button id="map-info-close" class="map-info-close">✕</button>
+  <h3 id="map-info-title"></h3>
+  <p id="map-info-text"></p>
+</div>
+<!-- END MAP -->
+
+        <div class="parchment">
+            <div class="stain" style="top: -20px; left: -20px;"></div>
+            <h1>Atlas of the Sovereignty</h1>
+            <p style="text-align: center;"><em>Key Locations for Roleplay</em></p>
+
+            <h2>I. THE CARPATHIAN SPIRE (Headquarters)</h2>
+            <p>The geo-magical anchor of the Bloodline. Safe territory for all sworn members.</p>
+            
+            <div class="location-card">
+                <h3>The Prism Chamber (The Summit)</h3>
+                <p><strong>Description:</strong> The highest point of the Spire. It houses the Runic of Zenith and a massive, complex array of lenses and mirrors aimed at the sky. The walls are etched with star charts.</p>
+                <p><strong>Usage:</strong> High Command meetings, Ritual planning, and Varrick's personal study.</p>
+                <p><strong>Atmosphere:</strong> Cold, silent, smelling of ozone and old parchment.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Great Hearth (Social Hub)</h3>
+                <p><strong>Description:</strong> A cavernous, gothic dining hall lit by floating braziers of cold, blue fire. Long tables are set for the Horde, though the food varies (meat for Orcs, fine wine for Butlers).</p>
+                <p><strong>Usage:</strong> General social RP, receiving mission briefings, and inter-faction mingling.</p>
+                <p><strong>Atmosphere:</strong> Boisterous but disciplined. The only place where an Ogre and a Skinstealer might share a drink.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Hollows (The Undercroft)</h3>
+                <p><strong>Description:</strong> A labyrinth of damp stone tunnels beneath the Spire. This is the domain of the Goblins and Mendacius. It contains the torture cells, the Skinstealer's "wardrobe," and the Goblin workshops.</p>
+                <p><strong>Usage:</strong> Interrogation RP, stealth training, and darker character development.</p>
+                <p><strong>Atmosphere:</strong> Claustrophobic, damp, and filled with the sounds of grinding metal and distant screams.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Aerie of Ash (The Roost)</h3>
+                <p><strong>Description:</strong> Huge, open balconies jutting from the Spire's mid-section. This is where the Desmodus Bats and Dragons roost. The stone is scorched and stained.</p>
+                <p><strong>Usage:</strong> Preparing for aerial sorties, caring for the beasts, and overlooking the valley below.</p>
+                <p><strong>Atmosphere:</strong> Windy, exposed, and smelling of sulfur and raw meat.</p>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>II. THE SHADOWED DOMINION (Controlled Territory)</h2>
+            <p>The lands immediately surrounding the Spire. Dangerous to mortals, safe for the Horde.</p>
+
+            <div class="location-card">
+                <h3>The Bone-Fields (The War Camp)</h3>
+                <p><strong>Description:</strong> A desolate, muddy plateau at the base of the Spire. It is littered with the skeletal remains of failed sieges. Here, the Orcs and Ogres drill constantly, building siege engines and wrestling for dominance.</p>
+                <p><strong>Usage:</strong> Combat training, duels, and marshaling large armies for Saturday raids.</p>
+                <p><strong>Atmosphere:</strong> Brutal, loud, and muddy.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Blackwood Forest (The Perimeter)</h3>
+                <p><strong>Description:</strong> A dense, ancient pine forest that blocks the path to the Spire. The trees are twisted, and the mist never lifts. Holy Bulwarks patrol the tree line.</p>
+                <p><strong>Usage:</strong> Patrol RP, hunting encroaching spies, and ambush setups.</p>
+                <p><strong>Atmosphere:</strong> Eerie, silent, and intensely foggy.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Ruined Chapel of St. Ilias (The Outpost)</h3>
+                <p><strong>Description:</strong> A desecrated Christian church halfway down the mountain. Varrick has converted it into a forward observation post. The altar is now a map table.</p>
+                <p><strong>Usage:</strong> Small team briefings before a raid, lookout duty.</p>
+                <p><strong>Atmosphere:</strong> Blasphemous and quiet. Stained glass is broken; religious icons are defaced.</p>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>III. THE CONTESTED FRONTIERS (Enemy Territory)</h2>
+            <p>Hostile zones where the Horde must tread carefully. These are raid locations.</p>
+
+            <div class="location-card">
+                <h3>The Iron Pass (Iron Pact Territory)</h3>
+                <p><strong>Description:</strong> A narrow, fortified canyon controlled by the Iron Pact mercenaries. Stone watchtowers line the cliffs, and a massive gate blocks the trade road.</p>
+                <p><strong>Usage:</strong> Sabotage Missions. Orcs attacking the gates while Goblins climb the cliffs to silence the watchtowers.</p>
+                <p><strong>Danger Level:</strong> High. Heavily guarded by crossbowmen and boiling oil.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Monastery of the White Sun (Inquisition Stronghold)</h3>
+                <p><strong>Description:</strong> A pristine, white-stone fortress located in a sunny valley. It is surrounded by fields of garlic and "Sun-Flowers" (magical flora that burns vampires). It houses a vast library of anti-undead knowledge.</p>
+                <p><strong>Usage:</strong> Heist Missions. Stealing books, kidnapping priests for intel, or sabotaging their bells.</p>
+                <p><strong>Danger Level:</strong> Extreme. The ground is consecrated; direct sunlight is amplified here.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Silver Market of Buda (Neutral/Hostile City)</h3>
+                <p><strong>Description:</strong> The bustling medieval marketplace of a major human city. It is filled with merchants, spies, and the Silver Hand Cult alchemists.</p>
+                <p><strong>Usage:</strong> Espionage & Infiltration. Skinstealers blending in to gather rumors, Goblins stealing reagents, and Butlers negotiating secret trades.</p>
+                <p><strong>Danger Level:</strong> Variable. If cover is blown, the city guard swarms.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Pale Crypts (Rival Vampire Territory)</h3>
+                <p><strong>Description:</strong> A subterranean necropolis controlled by the Cult of the Pale Moon. It is beautiful but deadly, filled with ancient traps and mental illusions.</p>
+                <p><strong>Usage:</strong> Diplomacy or Assassination. Negotiating with rival vampires or raiding them for ancient artifacts.</p>
+                <p><strong>Atmosphere:</strong> Silent, dusty, and filled with a sense of ancient, decaying nobility.</p>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>IV. SPECIAL/EVENT LOCATIONS</h2>
+
+            <div class="location-card">
+                <h3>The Crash Site (The Meteor)</h3>
+                <p><strong>Description:</strong> A crater in the no-man's-land where a "Bleeding Star" fell. The earth is fused into glass, and the radiation interferes with magic.</p>
+                <p><strong>Usage:</strong> Resource gathering events (mining Star-Metal).</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Floating Archipelago (The High Sanctum)</h3>
+                <p><strong>Description:</strong> Broken islands hovering in the sky, dripping waterfalls into the void. Accessible only by dragon-back or giant bat.</p>
+                <p><strong>Usage:</strong> High-level raids against the Sky-Bound constructs.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Mirror-Lake (The Gateway)</h3>
+                <p><strong>Description:</strong> A perfectly still, black lake deep in a cave. Looking into it reveals the "Mirror Realm."</p>
+                <p><strong>Usage:</strong> Rituals involving the Night Walkers or summoning demons.</p>
+            </div>
+
+            <div class="location-card">
+                <h3>The Crossroads of the Hanging Man</h3>
+                <p><strong>Description:</strong> A muddy intersection of two main roads, marked by a gibbet where traitors are left.</p>
+                <p><strong>Usage:</strong> Meeting contacts, exchanging prisoners, or executing the Count's Justice publicly.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: THE CRIMSON BIBLE (FULL TALES) -->
+    <div id="bible" class="content-section">
+        <div class="parchment">
+            <div class="stain" style="top: 2%; right: 2%;"></div>
+            <h1>The Crimson Bible</h1>
+            <p style="text-align: center; font-style: italic;">The Sacred Texts of the Solar Nullification</p>
+            
+            <!-- BOOK I: ORIGIN -->
+            <div class="bible-chapter">Book I: The Genesis of Shadow</div>
+            
+            <div class="bible-title">The Gospel of the Witness</div>
+            <p><span class="drop-cap">T</span>hey say the forest breathes. I tell you, Father, it does not breathe. It <em>holds its breath</em>. We were twelve when we entered the Blackwood. Twelve Templars of the White Sun, armed with consecrated oil and silver-tipped bolts. We sought the "Demon of the Spire." High Inquisitor Karras gave us the map. He said the path was clear.</p>
+            <p>We found the path. But the path was not made of dirt. It was paved with silence. The first man, Brother Thomas, simply vanished. No scream. One moment he was marching, the next, the fog swallowed him. When we found him an hour later, he was... rearranged. Armor intact, but the man inside scooped out.</p>
+            <p>Then came the laughter from beneath the earth. Goblins, eyes like wet coins. And then, the heavy tread of the Orcs, grinning like old friends. I ran, Father. I dropped my shield and I ran. I heard a voice, cold as the grave, whisper in my ear: "Tell Karras we are keeping the silver. He can send more delivery boys next week."</p>
+            <p class="signature">— A Broken Templar</p>
+
+            <div class="bible-title">The First Drink</div>
+            <p><span class="drop-cap">I</span>t was not wine. It was dust. Varrick stood before the sarcophagus, the torchlight flickering against the stone. The inscription warned of a hunger that never slept. Varrick did not care. He cared only for the Hungarian army marching on his border.</p>
+            <p>He lifted the chalice. The dust tasted of copper and time. He swallowed. The pain was immediate, a fire in his veins that froze instead of burned. He fell. When he woke, the hunger was there. But so was the strength. He walked out of the mine, and for the first time, the night felt like a cloak tailored just for him.</p>
+            <p class="signature">— The First Chronicle</p>
+
+            <div class="bible-title">The Burning Chain</div>
+            <p><span class="drop-cap">T</span>hey thought the sun would kill him. They were fools. Count Mihai chained Varrick to the tower as dawn broke. The light hit his skin like a hammer. Flesh smoked. Blood boiled.</p>
+            <p>But Varrick did not scream. He stared into the sun. He studied it. He realized the pain was not a judgment; it was a frequency. If he could match it, he could own it. He pulled against the chains until his wrists snapped, then healed, then snapped again. Six hours. When the sun set, Varrick was a ruin of charred meat. But he was alive. And he was angry.</p>
+            <p class="signature">— The Legend of the Tower</p>
+            
+            <div class="bible-title">The Alchemist's Mistake</div>
+            <p><span class="drop-cap">K</span>laus thought he could cheat Varrick. He sold the Count "pure" quicksilver that was 40% lead. Varrick didn't demand a refund. He invited Klaus to dinner. "You appreciate mixtures," Varrick said. "So do I." He poured Klaus a glass of wine mixed with 40% spider venom. "Drink," Varrick said. "It's a blend."</p>
+            <p class="signature">— Court Record</p>
+            
+            <div class="bible-title">The Star-Metal Fever</div>
+            <p><span class="drop-cap">W</span>hen the meteor fell, the Orcs who touched it got sick. Their skin turned grey, their teeth fell out. Varrick didn't heal them. He studied them. "Fascinating," he said, watching an Orc vomit glowing bile. "The metal rejects organic life. Perfect for armor." He ordered the sick Orcs to be forged into the metal. They stopped screaming eventually.</p>
+            <p class="signature">— Research Note</p>
+
+            <!-- BOOK II: HORDE -->
+            <div class="bible-chapter">Book II: The Iron Horde</div>
+            
+            <div class="bible-title">The Psalm of Iron</div>
+            <p><span class="drop-cap">T</span>he humans fight for flags. They fight because a man in a fancy hat told them a piece of cloth is worth dying for. We fight for the Rust.</p>
+            <p>Before the raid on the Alpine Pass, I gathered the boys in the mud. We had no flag. We had a barrel filled with the blood of the ox we ate last night. "Who owns your breath?" I asked them. <strong>"The Sovereign!"</strong> they roared.</p>
+            <p>I dipped my hands into the barrel. I smeared the red stripe across my chest plate. Once you are marked, you are a ghost. Ghosts don't fear arrows. Ghosts don't fear pain. Ghosts just walk through the walls and take what is theirs. Varrick doesn't pay us in gold. He pays us in the look on a human's face when they realize their gods can't stop us.</p>
+            <p class="signature">— Iron-Blood Warboss</p>
+
+            <div class="bible-title">The Chronicle of the Breaker</div>
+            <p><span class="drop-cap">S</span>mall-Things talk too much. The Green Ones chatter about keys. The Iron-Skins shout about glory. The Tiny Master speaks low, like thunder far away.</p>
+            <p>I do not care for talk. I care for the Wall. The Wall is tall. Made of white stone. "Break it," the Tiny Master said. He pointed his pale finger. "Behind the stone is the meat."</p>
+            <p>I picked up the tree trunk. I ran. The ground shook. The snacks on the wall started shooting little toothpicks at me. One hit my eye. I ate it.</p>
+            <p>I hit the gate. <strong>CRACK.</strong> The wood groaned. I hit it again. <strong>BOOM.</strong> The gate exploded. I walked in. The men in shiny metal stood there, shaking. "Meat," I grunted.</p>
+            <p class="signature">— Gorge-Walker Ogre</p>
+
+            <div class="bible-title">The Mud-Field Duel</div>
+            <p><span class="drop-cap">T</span>wo Orcs stood in the rain. One wanted to lead. The other wanted to keep leading. They didn't use words. They used hammers. The mud turned pink. Varrick watched from the balcony, drinking wine. When the challenger finally crushed the old leader's skull, Varrick applauded. "Promotion accepted," he said. The new Warboss bowed, blood dripping from his chin.</p>
+            <p class="signature">— Observer's Note</p>
+
+            <div class="bible-title">The Ogre's Polite Dinner</div>
+            <p><span class="drop-cap">T</span>he Ogre known as "Gorge" found a knight in full plate armor. He didn't smash him. He peeled him. Like a shrimp. The knight screamed the whole time. Gorge looked confused. "Why noise?" he asked. "I taking wrapper off."</p>
+            <p class="signature">— Goblin Report</p>
+            
+            <div class="bible-title">The Weaver's Trap</div>
+            <p><span class="drop-cap">T</span>he miners dug too deep. They found the crystal caves, and something found them. Varrick walked into the dark. He saw the eight eyes glowing in the gloom. The Brood Weaver hissed, its legs clicking on the stone. Varrick did not draw his sword. He held out a piece of flesh—not cow, but a runic-carved heart of a traitor. The spider took it. It spun him a web of steel. "Good girl," Varrick whispered. "Now, let us catch bigger flies."</p>
+            <p class="signature">— The Deep Crawlers</p>
+            
+            <div class="bible-title">The Ogre's Pet</div>
+            <p><span class="drop-cap">B</span>ash the Ogre found a wolf pup. He didn't eat it. He named it "Small-Bite." He carries it in his pouch. The wolf is terrified. It shakes constantly. But no one touches Small-Bite. Because Bash will eat anyone who looks at it wrong. Even Varrick finds it amusing.</p>
+            <p class="signature">— Camp Gossip</p>
+            
+            <div class="bible-title">The Orc's Last Stand</div>
+            <p><span class="drop-cap">G</span>rok held the bridge alone. Thirty knights against one Orc. He laughed. He threw his axe into the river and fought with his fists. He died, of course. But he took twelve knights with him. We found his body later. He was still smiling. The knights were not.</p>
+            <p class="signature">— War Report</p>
+            
+            <div class="bible-title">The Weaver's Patience</div>
+            <p><span class="drop-cap">T</span>he spider did not move for three days. It hung from the ceiling of the throne room, looking like a chandelier of crystal and bone. The assassin entered. He looked left. He looked right. He did not look up. The web fell like a net of diamonds. He was wrapped before he hit the floor. The Weaver descended slowly. It does not like fast food.</p>
+            <p class="signature">— Palace Guard Log</p>
+            
+            <div class="bible-title">The Silk Road</div>
+            <p><span class="drop-cap">W</span>e needed to cross the chasm. The bridge was out. The Brood Weavers stepped forward. They spun a bridge of silk, thick as a man's arm, across the gap. The Orcs were afraid to walk on it. Varrick walked first. "It is stronger than steel," he said. The army followed. The spiders watched, clicking their mandibles.</p>
+            <p class="signature">— Campaign Diary</p>
+
+            <!-- BOOK III: VERMIN -->
+            <div class="bible-chapter">Book III: The Book of Vermin</div>
+
+            <div class="bible-title">The Parable of the Gluttonous Spy</div>
+            <p><span class="drop-cap">T</span>he parchment tastes like dry leaves and old glue. Nasty stuff. But the ink... ah, the ink tastes like victory.</p>
+            <p>I was deep in the Mayor's private study. A nice room. The Mayor was asleep in his chair, snoring like a dying pig. My orders were simple: <em>"Secure the tax ledger. Do not be seen. Do not carry evidence."</em></p>
+            <p>I found the ledger. Thick, bound in red leather. Too big to carry out the chimney. So, I did what any good Rhine-Rat does. I ate it. Page one: Tolls. <em>Crunch.</em> Dry. Page fifty: The secret path the Inquisition uses. <em>Delicious.</em></p>
+            <p>Back at the Spire, the Alchemists gave me the heaving-draught. It burns coming up. But as I retched the pulp onto the silver tray, and the ink began to reform into words under the Master's spell, I saw the Count smile. That smile is worth a thousand stomachaches.</p>
+            <p class="signature">— A Goblin Spy</p>
+
+            <div class="bible-title">The Goblin's Tooth</div>
+            <p><span class="drop-cap">S</span>nikgit lost a tooth picking a lock. It fell into the mechanism and jammed it. The guards were coming. Snikgit didn't panic. He spit acid on the lock—his own stomach bile. It melted the iron. He got the door open, grabbed the chalice, and ran. He smiled at the Sovereign later with a gap in his grin. Varrick replaced the tooth with a gold one. "For improvisation," he said.</p>
+            <p class="signature">— Tales of the Warren</p>
+
+            <div class="bible-title">The Rat Ogre's Toy</div>
+            <p><span class="drop-cap">I</span>t was a doll. A child's doll, made of straw. The Rat Ogre found it in the ruins of the village. The beast, ten feet of muscle and rage, stopped destroying. It picked up the doll with two fingers. It growled at anyone who came near. For three days, the monster carried the doll. Then, during the next battle, an arrow hit the doll. The Rat Ogre went berserk. It tore three knights in half. Grief is a powerful fuel.</p>
+            <p class="signature">— Battlefield Observation</p>
+            
+            <div class="bible-title">The Goblin's Map</div>
+            <p><span class="drop-cap">T</span>he map was too big to steal. So Fizgig drew it. On his own belly. With a knife. He carved the lines of the fortress into his green skin. He bled the whole way back. When he showed Varrick, the Count traced the scars with a cold finger. "Accuracy in suffering," Varrick noted. "Commendable."</p>
+            <p class="signature">— The Warrens</p>
+            
+            <div class="bible-title">The Rat Ogre's Stitching</div>
+            <p><span class="drop-cap">T</span>he beast was falling apart. Its arm was hanging by a thread of muscle. The Goblin surgeon didn't use thread. He used wire. He stitched the Rat Ogre back together while it was awake. The beast growled low in its throat, a sound like grinding stones. "Hold still," the Goblin snapped. "Or I'll sew your mouth shut too." The beast held still.</p>
+            <p class="signature">— Lab Log</p>
+
+            <!-- BOOK IV: MASKS -->
+            <div class="bible-chapter">Book IV: The Book of Masks</div>
+
+            <div class="bible-title">The Lament of the False Face</div>
+            <p><span class="drop-cap">T</span>he hardest part isn't the flaying. It's the <em>itching</em>. I was deep undercover as "Sir Roderick." I was at the banquet table when I felt it. A twitch in my left eye. Not <em>my</em> eye—Roderick's eye. He was remembering his sister sitting across the table. <em>Brother,</em> the dead skin whispered into my mind. <em>Why are your hands so cold?</em></p>
+            <p>I stumbled into the garderobe and looked in the mirror. The face—<em>his</em> face—was sagging. The lip was sliding down, revealing the raw, red muscle of my true smile underneath. "Not yet," I hissed, pinning the face back on with a silver needle. I wiped the blood away. When I walked back out, Sir Roderick was smiling again. But his sister... she stopped eating. She knew.</p>
+            <p class="signature">— The Deceiver</p>
+
+            <div class="bible-title">Proverbs of the Keeper</div>
+            <p><span class="drop-cap">I</span>t is a common misconception that the Spire runs on blood. It runs on <strong>schedules</strong>. A Goblin burst into the East Wing. "Keeper! The Ogre got loose in the lab! He's eating the explosive salts!" I sighed. "Which Ogre?" "Gorge-Eater!"</p>
+            <p>I walked to the lab. Calmly. Running is for prey. Gorge-Eater was chewing on a stick of volatile sulfur. His stomach was glowing orange. "Gorge-Eater," I said softly. I reached into my coat and pulled out a single, small silver bell. I rang it once. <em>Ting.</em> The Ogre's eyes widened. He knew what that sound meant. It meant <em>no dinner.</em> He spat the explosive out immediately. "Good boy," I said. "Now go to your kennel." Chaos is inevitable. Composure is a choice.</p>
+            <p class="signature">— A Keeper of the Spire</p>
+
+            <div class="bible-title">The Butler's Poison</div>
+            <p><span class="drop-cap">T</span>he wine was exquisite. The Duke complimented me on the vintage. "From the Count's personal cellar?" he asked. "Indeed, Your Grace," I replied, pouring him another glass. "It has been aged for a century." The Duke drank deeply. He did not know that the "aging" process involved a single drop of Basilisk venom, diluted over a hundred years. He died three days later, quietly, in his sleep. No one suspected the wine. It was too good.</p>
+            <p class="signature">— Service Record</p>
+
+            <div class="bible-title">The Skinstealer's Wedding</div>
+            <p><span class="drop-cap">I</span> married the Princess. Or rather, Prince Valerius did. I was wearing Valerius. The ceremony was beautiful. I felt his heart—his *actual* heart, drying in my pocket—ache as I said "I do." Later that night, I opened the castle gates for the Orcs. The honeymoon was short.</p>
+            <p class="signature">— Agent Report</p>
+            
+            <div class="bible-title">The Butler's Key</div>
+            <p><span class="drop-cap">T</span>he guest was rude. He demanded more wine. He demanded to see the Count. He kicked a Goblin. I smiled. "Right this way, sir." I led him to the Blue Room. I locked the door. The Blue Room has no windows. And it has no floor. He fell for a long time. I went back to polishing the silver.</p>
+            <p class="signature">— Staff Diary</p>
+            
+            <div class="bible-title">The Skinstealer's Mirror</div>
+            <p><span class="drop-cap">W</span>e break them. All of them. If we see our own reflection while wearing a face, the face starts to scream. It remembers who it was. I walked past a polished shield today. The reflection blinked at me. I didn't blink. I had to peel the face off and burn it. A waste of a good merchant.</p>
+            <p class="signature">— Diary of a Spy</p>
+            
+            <div class="bible-title">The Butler's Ledger</div>
+            <p><span class="drop-cap">V</span>arrick asked for the count. "How many souls?" he asked. I opened the book. "In the dungeon: forty. In the field: two hundred. In the larder: twelve." Varrick nodded. "And the cost?" "Three thousand gold pieces and your soul, my Lord." He laughed. "Cheap."</p>
+            <p class="signature">— Accounting</p>
+
+            <!-- BOOK V: PAIN -->
+            <div class="bible-chapter">Book V: The Book of Pain</div>
+
+            <div class="bible-title">The Epistle of the Torturer</div>
+            <p><span class="drop-cap">T</span>here is no such thing as a brave man. There are only men who have not yet been introduced to their own nervous system. The prisoner refused to speak. "I will die before I betray the Order!" he screamed. "Death is a release," I explained. "I am not here to release you. I am here to <strong>expand</strong> you."</p>
+            <p>I did not cut him. I simply showed him the <strong>Box</strong>. Varrick had given it to me. It contained a single black beetle. A beetle that eats <em>memory</em>. "This little friend," I whispered, "will crawl into your ear. It will eat the memory of your mother's face. Then your name. You will remain alive, a hollow shell." I brought the beetle close. The humming started. He didn't scream. He broke. He spilled the formula like water from a cracked pitcher.</p>
+            <p class="signature">— The Breaker</p>
+
+            <div class="bible-title">The Mendacius's Lullaby</div>
+            <p><span class="drop-cap">S</span>leep is the enemy of interrogation. When they sleep, they heal. I keep them awake with a metronome. *Click. Click. Click.* Every ten seconds, for four days. By the fifth day, the sound of the click is louder than thunder to them. They will tell me anything just to stop the clicking. I don't even need the knife.</p>
+            <p class="signature">— Technique Note</p>
+
+            <div class="bible-title">The Anatomy Lesson</div>
+            <p><span class="drop-cap">T</span>he Count asked me where the soul resides. I dissected three paladins to find out. I found fear in the stomach, courage in the heart, and lies in the tongue. But no soul. "Keep looking," the Count said. I am still looking.</p>
+            <p class="signature">— Lab Notes</p>
+            
+            <div class="bible-title">The Mendacius's Garden</div>
+            <p><span class="drop-cap">I</span> do not bury the bodies. I plant them. I found a rose that feeds on iron. I planted it in the chest of a knight. The iron in his blood made the petals black. The thorns are sharp as daggers. Varrick wears one in his lapel. It smells of rust and fear.</p>
+            <p class="signature">— Garden Log</p>
+            
+            <div class="bible-title">The Silent Scream</div>
+            <p><span class="drop-cap">I</span> severed his vocal cords first. Then I showed him the fire. He screamed, but no sound came out. It was pure panic, trapped in a cage of flesh. The eyes tell you everything you need to know when the mouth cannot lie.</p>
+            <p class="signature">— Interrogation Record</p>
+
+            <!-- BOOK VI: CORRUPTION -->
+            <div class="bible-chapter">Book VI: The Book of Corruption</div>
+
+            <div class="bible-title">The Hushed Saint's Sermon</div>
+            <p><span class="drop-cap">G</span>od is not deaf. He is simply ignoring you. The Hushed Saint stood in the village square. The people threw stones. He did not bleed; he smiled. "Why does the sun burn?" he asked. "Because it hates you. It blisters your skin. It dries your crops. The Night... the Night cools. The Night rests. The Sovereign brings the eternal rest." By morning, half the village had joined the procession.</p>
+            <p class="signature">— Missionary Report</p>
+
+            <div class="bible-title">The Womb's Gift</div>
+            <p><span class="drop-cap">I</span>t was a small fly. Green and buzzing. The Womb of Despair breathed it into the sleeping knight's mouth. He woke up coughing. Two days later, he was bloated. Three days later, he burst. A thousand flies erupted from his chest. The castle fell not to swords, but to the buzzing.</p>
+            <p class="signature">— Biological Warfare Log</p>
+
+            <div class="bible-title">The Broken Bell</div>
+            <p><span class="drop-cap">T</span>he church bell rang every morning to ward off evil. The Hushed Saint climbed the tower. He didn't cut the rope. He inscribed a single rune of silence on the clapper. The next morning, the bell swung, but no sound came. The silence was louder than the ringing. The priest went mad trying to fix it. That night, the vampires came.</p>
+            <p class="signature">— Subversion Tactic</p>
+            
+            <div class="bible-title">The Womb's Children</div>
+            <p><span class="drop-cap">T</span>he flies love me. They cover my skin like a living cloak. When I walk, the ground moves. I walked into the granary. The flies ate the wheat. They laid eggs in the flour. The bread in the city tasted of rot. They blamed the devil. It was just me.</p>
+<p class="signature">— The Plague-Bearer</p>
+            
+            <div class="bible-title">The Saint's Whisper</div>
+            <p><span class="drop-cap">I</span> sat in the confessional. The Nun confessed her sins. I whispered back. "Sin is just freedom," I said. "God watches, but Varrick *acts*." She came out pale. She put poison in the Abbot's wine that night. A conversion is better than a kill.</p>
+            <p class="signature">— Corruption Log</p>
+
+            <!-- BOOK VII: FROST & STONE -->
+            <div class="bible-chapter">Book VII: Book of Frost & Stone</div>
+
+            <div class="bible-title">The Night Walker's Breath</div>
+            <p><span class="drop-cap">T</span>he fire was roaring in the hearth. The Night Walker entered. He did not speak. He simply exhaled. The fire turned blue, then grey, then died. The ale in the mugs froze solid. "Cold is the only purity," he whispered. The tavern patrons didn't run; they couldn't. Their feet were frozen to the floor.</p>
+            <p class="signature">— Encounter Log</p>
+
+            <div class="bible-title">The Stone Protector's Vigil</div>
+            <p><span class="drop-cap">I</span>t has stood there for five hundred years. A golem of Roman stone. It does not sleep. It does not eat. Moss grows on its shoulder. A thief tried to sneak past it to steal the Runic. The Golem moved one finger. *Snap.* The thief's spine. The Golem went back to being a statue.</p>
+            <p class="signature">— Guard Report</p>
+
+            <div class="bible-title">The Deep Chill</div>
+            <p><span class="drop-cap">V</span>arrick needed the river to stop flowing so his armies could cross. The Night Walkers gathered at the bank. They touched the water. Ice spread like a spiderweb, thick and white. The Rhine became a road. The fish are still frozen there, staring up at the boots marching over them.</p>
+            <p class="signature">— Campaign Strategy</p>
+            
+            <div class="bible-title">The Stone Protector's Sleep</div>
+            <p><span class="drop-cap">D</span>o statues dream? This one does. It dreams of Rome. It dreams of the sun on white marble. Now it stands in the dark, covered in moss. Varrick touched it. "Wake up," he said. "Rome is dead. I am here." The stone eyes opened. They glowed red. It serves the new Emperor now.</p>
+            <p class="signature">— Magical Study</p>
+            
+            <div class="bible-title">The Night Walker's Path</div>
+            <p><span class="drop-cap">W</span>e walked through the village at midnight. We did not touch anyone. We just walked. The temperature dropped forty degrees. The villagers died in their beds, frozen under their blankets. No blood. Just ice. A clean harvest.</p>
+            <p class="signature">— The Frost-Bound</p>
+            
+            <div class="bible-title">The Undead Knight's Memory</div>
+            <p><span class="drop-cap">H</span>e stood guard for ten years. He never moved. One day, a child dropped a flower at his feet. The Knight looked down. His rusted gauntlet twitched. He remembered a daughter. He remembered a field. Then the memory was gone, crushed by Varrick's command. He stepped on the flower.</p>
+            <p class="signature">— Observation</p>
+
+            <!-- BOOK VIII: WINGS -->
+            <div class="bible-chapter">Book VIII: The Book of Wings</div>
+
+            <div class="bible-title">Ignis's Roost</div>
+            <p><span class="drop-cap">T</span>he Red Dragon does not like the cold. He sleeps wrapped around the main chimney of the Spire. When he snores, smoke puffs out of the fireplaces in the guest rooms. The Count allows it. A warm dragon is a loyal dragon.</p>
+            <p class="signature">— Keeper's Note</p>
+
+            <div class="bible-title">The Bat's Night Vision</div>
+            <p><span class="drop-cap">T</span>he Desmodus hangs upside down, wrapped in leather wings. It hears the heartbeat of a rabbit a mile away. It hears the heartbeat of a spy in the bushes. It swoops. Silent. Only the wind gives it away. Then the scream. Then silence again.</p>
+            <p class="signature">— Aerial Scout</p>
+
+            <div class="bible-title">Malachor's Shadow</div>
+            <p><span class="drop-cap">W</span>hen the Black Dragon flies, the moon disappears. He is vast. He landed on a watchtower and the stone crumbled under his weight. He didn't mean to destroy it; he just wanted a perch. He looked confused when the humans started screaming.</p>
+            <p class="signature">— Observation</p>
+            
+            <div class="bible-title">The Desmodus Dive</div>
+            <p><span class="drop-cap">T</span>he sentry was looking forward. He didn't look up. The Bat fell from the sky like a stone. It grabbed him by the shoulders. No sound of wings. Just a *whoosh* of air and the man was gone. Dropped from a thousand feet. Gravity did the killing. The Bat just did the lifting.</p>
+            <p class="signature">— Aerial Tactics</p>
+            
+            <div class="bible-title">Ignis's Hoard</div>
+            <p><span class="drop-cap">D</span>ragons like gold. Ignis likes steel. He collects the armor of the knights he burns. He melts them into a slag heap in his cave. It looks like a throne. He sleeps on it. He dreams of burning the world.</p>
+            <p class="signature">— Beast Master Log</p>
+
+            <!-- BOOK IX: THE ELITE -->
+            <div class="bible-chapter">Book IX: The Book of The Elite</div>
+
+            <div class="bible-title">Revelation of the Ashen</div>
+            <p><span class="drop-cap">T</span>he recruit screamed. They always scream. They think the Rite of Cinders is a test of endurance. He walked the burning path. He reached the end. "You held on to your pain," the Sovereign said softly. "You are still... <em>you</em>."</p>
+            <p>I stepped forward. "We require absence." I drew the blade. I ended him. The Ashen Veil does not want. We simply <em>are</em>.</p>
+            <p class="signature">— The First Cinder</p>
+
+            <div class="bible-title">The Hollow Salute</div>
+            <p><span class="drop-cap">T</span>he Emperor's assassin lunged at Varrick. The Ashen Veil guard did not draw a weapon. He stepped into the blade. It went through his chest. He did not flinch. He grabbed the assassin's wrist with a dead grip and crushed it. "I am empty," the guard said. "You cannot kill what is not there."</p>
+            <p class="signature">— Combat Log</p>
+
+            <div class="bible-title">The Veil's Silence</div>
+            <p><span class="drop-cap">T</span>hey stand in the throne room for days. They do not shift their weight. They do not blink. A fly landed on the eye of the Second Ash. He did not blink. The fly died of boredom.</p>
+<p class="signature">— Observation</p>
+            
+            <div class="bible-title">The Ashen Walk</div>
+            <p><span class="drop-cap">T</span>he floor was lava. Magical, boiling rock. The Ashen Veil walked across it to retrieve the fallen Runic. His boots burned off. His feet burned off. He walked on the stumps of his ankles. He handed the Runic to Varrick and collapsed. He didn't scream. He just waited to be healed or discarded. Varrick healed him.</p>
+            <p class="signature">— Fealty Record</p>
+            
+            <div class="bible-title">The Shadow's Edge</div>
+            <p><span class="drop-cap">I</span> saw the First Ash kill a man with a spoon. It wasn't a fight. It was a correction. The man was loud. The Ash was quiet. The spoon entered the eye. The noise stopped. The Ash put the spoon back on the table and continued guarding the door.</p>
+            <p class="signature">— Tavern Tale</p>
+
+            <!-- BOOK X: WAR & PROPHECY -->
+            <div class="bible-chapter">Book X: War & Prophecy</div>
+
+            <div class="bible-title">The Battle of the Broken Bridge</div>
+            <p><span class="drop-cap">T</span>he Iron Pact held the bridge. We held the riverbank. The Orcs charged. Arrows fell like rain. It looked like suicide. But while the Orcs died, the Goblins were underneath the bridge, sawing the supports. The bridge collapsed. The mercenaries fell into the waiting arms of the Night Walkers in the water.</p>
+            <p class="signature">— War Record</p>
+
+            <div class="bible-title">The Inquisitor's Blindness</div>
+            <p><span class="drop-cap">H</span>igh Inquisitor Karras stared into the sun until he went blind. He claims he sees God. Varrick says he sees only spots. We will see who is right when the sun goes black.</p>
+            <p class="signature">— Theological Debate</p>
+
+            <div class="bible-title">Finding the Keystone</div>
+            <p><span class="drop-cap">I</span>t was buried under the Cathedral. We had to dig for months. The chanting of the monks above gave us a headache. But when we found it, the stone hummed. It remembers the earth before the light. It wants to go back.</p>
+            <p class="signature">— Runic Report</p>
+
+            <div class="bible-title">The Crucible's Heat</div>
+            <p><span class="drop-cap">T</span>he Sun-Eater's Crucible is cold to the touch, but it melts gold in seconds. It is hungry. We feed it scraps of solar energy caught in mirrors. It glows violet. It is waiting for the main course.</p>
+            <p class="signature">— Alchemical Note</p>
+
+            <div class="bible-title">The Chronogram's Ticking</div>
+            <p><span class="drop-cap">T</span>he device ticks, but not with gears. It ticks with the pulse of stars. It is counting down. To what? The Goblins say doomsday. Varrick says Tuesday.</p>
+            <p class="signature">— Observation</p>
+            
+            <div class="bible-title">The Meteor's Heat</div>
+            <p><span class="drop-cap">T</span>he rock from the sky was hot. Not fire hot. Sick hot. The Orcs who carried it lost their hair. Their skin turned grey. They died vomiting black bile. Varrick watched. "Put it in lead," he said. "It kills life. We can use that."</p>
+            <p class="signature">— Recovery Log</p>
+            
+            <div class="bible-title">The Inquisition's Pyre</div>
+            <p><span class="drop-cap">T</span>hey burned the village of Oakhaven. They thought we were hiding there. We weren't. We were hiding in the village next door. We watched the smoke rise. "They are doing our work for us," Varrick said. "Fear spreads faster than fire."</p>
+            <p class="signature">— Strategy Meeting</p>
+            
+            <div class="bible-title">The Iron Pact's Fear</div>
+            <p><span class="drop-cap">T</span>he mercenaries guard the pass. But they don't look into the dark. They look at their feet. They are afraid of the "Ghost of the Pass." It's just a Skinstealer who whistles at night. But the whistling drives them mad.</p>
+            <p class="signature">— Scouting Report</p>
+            
+            <div class="bible-title">The Count's Portrait</div>
+            <p><span class="drop-cap">A</span> painter came to the Spire. He wanted to paint Varrick. He tried for months. He couldn't get the eyes right. "They are too old," he wept. "They have seen too much." He went mad. He painted the eyes black. Then he jumped off the tower.</p>
+            <p class="signature">— Art History</p>
+            
+            <div class="bible-title">The Count's Silence</div>
+            <p><span class="drop-cap">V</span>arrick stood on the balcony for three days. He didn't move. He watched the sun rise and set. Rise and set. He was calculating. When he finally moved, he said one word: "Soon." The Goblins shivered.</p>
+            <p class="signature">— Personal Guard Note</p>
+
+            <!-- BOOK XI: THE ENEMY CHRONICLES -->
+            <div class="bible-chapter">Book XI: The Book of the Adversary</div>
+            
+            <div class="bible-title">Letter from the Iron Pass</div>
+            <div class="letter-box">
+                <p>Dearest Martha,</p>
+                <p>Do not spend the coin I sent. Bury it. The nights here are wrong. The Captain says we are safe behind the walls, but I hear scratching. Not rats. Something bigger. Something that knows how to be quiet. Yesterday, Hans went to relieve himself. We found his helmet, but not his head. The Captain says it was a wolf. Wolves don't unbuckle chinstraps, Martha. Wolves don't leave coins on the eyes of the dead. I fear the rumors are true. The Count is awake.</p>
+                <p class="signature">— Mercenary Private (Deceased)</p>
+            </div>
+
+            <div class="bible-title">Inquisitor Karras's Journal</div>
+            <div class="letter-box">
+                <p>Day 40. The darkness mocks me. I burned the witch in the village square, but the fire cast no light. It was as if the air itself swallowed the illumination. Varrick's stain is spreading. My acolytes report shadows moving against the wind. They are afraid. Good. Fear is the fuel of righteousness. I will burn this entire forest to ash if I must. If God will not light the world, I will light it myself.</p>
+                <p class="signature">— High Inquisitor Karras</p>
+            </div>
+
+            <div class="bible-title">A Pale Moon Warning</div>
+            <div class="letter-box">
+                <p>To my Brothers in the Deep,</p>
+                <p>Varrick is insane. He seeks to touch the Sun. Does he not remember the First Burning? He risks exposing us all. His clumsy 'Horde' tramples the delicate balance we have maintained for centuries. The Inquisition is stirring because of his noise. We must stop him. Not for the humans, but for ourselves. Let him have his war. We will take his silence.</p>
+                <p class="signature">— Elder of the Pale Moon</p>
+            </div>
+            
+            <div class="bible-title">The Alchemist's Receipt</div>
+            <div class="letter-box">
+                <p>Sold to: The Gentleman in Grey (Varrick's Butler)</p>
+                <p>Item: 10 lbs of pure Sulfur.<br>
+                Item: 3 Vials of Basilisk Venom.<br>
+                Item: One (1) human heart, preserved in jar.</p>
+                <p>Total: 500 Gold Imperials.</p>
+                <p>Note: Please tell your master that if the heart starts beating again, it is not a refund issue. It is a necromancy issue.</p>
+                <p class="signature">— Silver Hand Cult</p>
+            </div>
+            
+            <div class="bible-title">The Mercenary Captain's Log</div>
+            <div class="letter-box">
+                <p>We caught one. A Goblin. Ugly little thing. We beat it for an hour. It just laughed. It said, "You can hit me, but you can't hit the water." I didn't know what it meant until the well exploded. Poison smoke. Half my men are coughing up blood. The other half are running. I am writing this as I pack. We are leaving the Pass. Let the Count have it.</p>
+                <p class="signature">— Captain Vorstag</p>
+            </div>
+
+            <div class="bible-title">The Inquisitor's Autopsy</div>
+            <div class="letter-box">
+                <p>Subject: Unknown Beast (Rat Ogre)</p>
+                <p>The creature is a stitched abomination. I found human muscle grafted to rodent bone. The heart has been replaced with a pump made of green glass. It burns to the touch. This is not natural evolution. This is *design*. Varrick is building monsters. We need more oil.</p>
+                <p class="signature">— Inquisitor Medicus</p>
+            </div>
+
+            <div class="bible-title">The Pale Moon Spy Report</div>
+            <div class="letter-box">
+                <p>I watched the Spire from the ridge. The Dragons are real. I saw three. Red, Green, Black. They are young, but they are growing. Varrick feeds them knights. If he lets them loose, there will be no night left to hide in. The fire will light the world.</p>
+                <p class="signature">— Pale Moon Scout</p>
+            </div>
+
+            <div class="bible-title">The Merchant's Complaint</div>
+            <div class="letter-box">
+                <p>To the City Guard,</p>
+                <p>My warehouse was robbed. They didn't take the silk. They didn't take the spices. They took the *mirrors*. All of them. Five hundred silver mirrors. Who steals mirrors? And why did they leave a pile of dead rats in the shape of a smiley face?</p>
+                <p class="signature">— Merchant of Buda</p>
+            </div>
+            
+            <div class="bible-title">The Iron Pact's Bounty</div>
+            <div class="letter-box">
+                <p>WANTED: The Skinstealer.</p>
+                <p>Description: Unknown. It could be anyone. It could be your wife. It could be your dog. It was last seen wearing the face of the Duke.</p>
+                <p>Reward: 10,000 Gold. (Must bring head for verification).</p>
+                <p class="signature">— Bounty Board</p>
+            </div>
+
+            <div class="bible-title">The Inquisitor's Prayer</div>
+            <div class="letter-box">
+                <p>Lord of Light, protect me from the shadows. They move when I look away. I hear them whispering my name. Karras says it is just the wind. But the wind doesn't know my sins.</p>
+                <p class="signature">— Novice Templar</p>
+            </div>
+
+            <div class="bible-title">The Traitor's Note</div>
+            <div class="letter-box">
+                <p>Varrick,</p>
+                <p>I know where the Keystone is. The Iron Pact moved it to the lower vault. I can get you in. But I want immunity. I want to be turned. Make me like you. Make me eternal.</p>
+                <p class="signature">— Anonymous (Found dead the next day)</p>
+            </div>
+
+            <div class="bible-title">The Silver Hand's Discovery</div>
+            <div class="letter-box">
+                <p>We tested the blood Varrick sent. It boils in sunlight. But if you mix it with quicksilver, it freezes. He isn't trying to cure himself. He is trying to become a lens. He wants to channel the sun. Madness. Brilliant madness.</p>
+                <p class="signature">— Master Alchemist</p>
+            </div>
+
+            <div class="bible-title">The Pale Moon's Fear</div>
+            <div class="letter-box">
+                <p>He is gathering the Runics. I felt the shift in the ley lines when the Goblin touched the Chronogram. If he completes the ritual, the sun will change. It will not kill us. It will enslave us. We must strike now.</p>
+                <p class="signature">— High Elder</p>
+            </div>
+
+            <div class="bible-title">The Mercenary's Bargain</div>
+            <div class="letter-box">
+                <p>We surrender. The Ogre ate the gate. We can't fight that. Take the pass. Just let us go.</p>
+                <p class="signature">— White Flag Message</p>
+            </div>
+
+            <div class="bible-title">The Inquisitor's Vision</div>
+            <div class="letter-box">
+                <p>I looked into the sun today. I saw a black spot. It was growing. It looked like a hand. Reaching down. God is angry. Or God is scared.</p>
+                <p class="signature">— Karras's Diary</p>
+            </div>
+
+            <div class="bible-title">The Spy's Last Words</div>
+            <div class="letter-box">
+                <p>I found the Spire. It is real. The walls bleed. The guards don't breathe. I am hiding in the stables. I think the horse knows I am here. It is looking at me with red eyes. Tell my wife I love h—</p>
+                <p class="signature">— Unfinished Letter</p>
+            </div>
+
+            <div class="bible-title">The Cult's Invitation</div>
+            <div class="letter-box">
+                <p>Count Varrick,</p>
+                <p>We have the book you seek. The Poisoner's Almanac. Meet us at the bridge. Alone. Or we burn it.</p>
+                <p class="signature">— Silver Hand</p>
+            </div>
+
+            <div class="bible-title">The Iron Pact's Defeat</div>
+            <div class="letter-box">
+                <p>They came from the ground. Orcs don't dig. But these did. They collapsed the floor of the barracks. We fell into the dark. And they were waiting. Eyes glowing. Teeth shining. It was a</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION: ROLES -->
+    <div id="roles" class="content-section">
+        <div class="parchment">
+            <div class="stain" style="bottom: 5%; right: 5%;"></div>
+            <h1>Ranks of the Horde</h1>
+            <p style="text-align: center;"><em>The Hierarchy of the Crimson Sovereignty</em></p>
+
+            
+            <h1>The Bestiary</h1>
+            <p style="text-align: center;"><em>To serve Count Varrick is to shed your former self. Choose the vessel that best suits your talents.</em></p>
+            
+            <div style="background: rgba(102, 0, 0, 0.1); border: 1px solid #660000; padding: 10px; margin-bottom: 20px; border-radius: 4px; font-size: 0.9em; color: #4a0404; text-align: center; box-shadow: 0 0 10px var(--accent-glow);">
+                <strong>⚠️ VISUAL MANDATE:</strong> All avatars must fit a <strong>Dark Medieval / Gothic Fantasy</strong> aesthetic. No anime, sci-fi, or modern clothing.
+            </div>
+
+            <h2>I. The Internal Order (Humanoid Support)</h2>
+            <div class="role-card">
+                <h3>🍷 THE BUTLER (The Keeper)</h3>
+                <p><strong>Race:</strong> Human (often ageless or alchemically extended).</p>
+                <p><strong>Lore Origin:</strong> Descendants of the original servant families of the Black Forest who swore blood-oaths to the Varrick line centuries ago.</p>
+                <p><strong>RP Function:</strong> Administrative & Social. You manage the Spire, greet guests, handle logistics for the Horde, and act as the Count's voice to the lower ranks. You do not fight on the front lines.</p>
+                <p><strong>Visuals:</strong> Pristine 12th-century formal wear, livery, pristine appearance (masks optional).</p>
+            </div>
+
+            <h2>II. The Iron Horde (Frontline Combat)</h2>
+            <div class="role-card">
+                <h3>🔨 THE ORC (The Iron-Blood)</h3>
+                <p><strong>Lore Origin:</strong> Brutal mercenaries from the Harz Mountains, betrayed by the Kaiser and saved by Varrick. They value strength and payment.</p>
+                <p><strong>RP Function:</strong> Shock Infantry. You are the discipline within the chaos. You hold the line, breach the gates, and execute the physical will of the Sovereign.</p>
+                <p><strong>Visuals:</strong> Green/Grey skin, heavy iron armor, jagged weaponry, scars.</p>
+            </div>
+            <div class="role-card">
+                <h3>🏔️ THE OGRE (The Alp-Walker)</h3>
+                <p><strong>Lore Origin:</strong> Massive, cannibalistic hill-giants from the Bavarian Alps. Tamed by Varrick’s steady supply of food.</p>
+                <p><strong>RP Function:</strong> Siege Engine. You move heavy objects, smash fortified doors, and act as a living shield for smaller units. You are simple-minded but loyal to the hand that feeds.</p>
+                <p><strong>Visuals:</strong> Massive stature, makeshift armor (wood/stone/iron), primal weaponry.</p>
+            </div>
+            <div class="role-card">
+                <h3>💀 THE UNDEAD KNIGHT (The Grave-Sworn)</h3>
+                <p><strong>Lore Origin:</strong> Fallen Teutonic Crusaders raised by Varrick’s necromancy. They retain their martial skill but have lost their souls.</p>
+                <p><strong>RP Function:</strong> Elite Heavy Infantry. You are tireless, fearless, and silent. You guard high-value targets and form the "Holy Bulwark" defensive line.</p>
+                <p><strong>Visuals:</strong> Rusted or blackened plate armor, skeletal or decaying features, silent demeanor.</p>
+            </div>
+
+            <h2>III. The Shadows (Stealth & Espionage)</h2>
+            <div class="role-card">
+                <h3>🗝️ THE GOBLIN (The Rhine-Rat)</h3>
+                <p><strong>Lore Origin:</strong> Sewer-dwelling scavengers from beneath Cologne. They are experts in alchemy, tunneling, and theft.</p>
+                <p><strong>RP Function:</strong> Infiltration & Sabotage. You fit in vents and tunnels where others cannot. You steal the keys, poison the wine, and copy the documents.</p>
+                <p><strong>Visuals:</strong> Small stature, rag-tag leather armor, goggles/alchemist gear, hoods.</p>
+            </div>
+            <div class="role-card">
+                <h3>🎭 THE SKINSTEALER (The Deceiver)</h3>
+                <p><strong>Lore Origin:</strong> An abomination created to mimic human form. They flay their victims and wear their skins to blend into mortal society.</p>
+                <p><strong>RP Function:</strong> Deep Cover Spy. You pose as a merchant, a priest, or a guard to gather intel from within enemy territory. You sow confusion and open gates from the inside.</p>
+                <p><strong>Visuals:</strong> Two forms. 1. A generic human disguise (Merchant/Peasant). 2. The True Form: A flayed, raw-muscle humanoid horror when the disguise is dropped.</p>
+            </div>
+
+            <h2>IV. The Abominations (Specialist Horror)</h2>
+            <div class="role-card">
+                <h3>🕸️ THE BROOD WEAVER (The Net-Spinner)</h3>
+                <p><strong>Lore Origin:</strong> Monstrous, crystal-spined arachnids found in the deepest silver mines of the Black Forest. Varrick fed them runic-infused flesh to tame them.</p>
+                <p><strong>RP Function:</strong> Ambush & Capture. You spin steel-hard webs to secure perimeters, trap intruders, and create "kill zones" for the Horde.</p>
+                <p><strong>Visuals:</strong> Giant spider body, purple crystalline spikes, multiple eyes.</p>
+            </div>
+            <div class="role-card">
+                <h3>⚙️ THE MENDACIUS (The Breaker)</h3>
+                <p><strong>Lore Origin:</strong> Torturers twisted by their own sadism, often enhanced with alchemical grafts to be better at inflicting pain.</p>
+                <p><strong>RP Function:</strong> Interrogation. You extract secrets from prisoners. You are the terrifying face of the Count's justice.</p>
+                <p><strong>Visuals:</strong> Executioner hoods, aprons stained with blood, collections of surgical tools/blades.</p>
+            </div>
+            <div class="role-card">
+                <h3>❄️ THE NIGHT WALKER (The Frost-Bound)</h3>
+                <p><strong>Lore Origin:</strong> Ancient spirits from the frozen Baltic north. They joined Varrick to bring about an eternal, sunless winter.</p>
+                <p><strong>RP Function:</strong> Magic & Area Control. You use frost magic to slow enemies, extinguish lights, and create cover for the Horde. You are cold and emotionless.</p>
+                <p><strong>Visuals:</strong> Pale/blue skin, ice-themed armor or robes, glowing blue eyes, aura of frost.</p>
+            </div>
+            <div class="role-card">
+                <h3>🐀 THE RAT OGRE (The Flesh-Molded)</h3>
+                <p><strong>Lore Origin:</strong> A horrific biological experiment fusing man, goblin, and rodent with "Vitalis Glass." Unstable and frenzied.</p>
+                <p><strong>RP Function:</strong> Berserker. You are unleashed to cause pure chaos and terror in enemy ranks. You require a handler (usually a Goblin) to direct you.</p>
+                <p><strong>Visuals:</strong> Hulking, furred monstrosity, mutations, warp-stone or alchemical implants.</p>
+            </div>
+            <div class="role-card">
+                <h3>🕯️ THE HUSHED SAINT (The Corrupter)</h3>
+                <p><strong>Lore Origin:</strong> A fallen priest or cultist who has seen the "Truth" of Varrick's solar conquest. They wield corrupted miracles.</p>
+                <p><strong>RP Function:</strong> Recruitment & Subversion. You preach the Count's gospel to demoralize the enemy and convert the weak-willed.</p>
+                <p><strong>Visuals:</strong> Corrupted priestly vestments, desecrated holy symbols, masks of silence or agony.</p>
+            </div>
+            <div class="role-card">
+                <h3>🦠 THE WOMB OF DESPAIR (The Plague-Bearer)</h3>
+                <p><strong>Lore Origin:</strong> A creature cursed to breed flies and pestilence. They are used to soften targets before an invasion.</p>
+                <p><strong>RP Function:</strong> Biological Warfare. You spread sickness and fear. You do not fight directly; you contaminate the battlefield.</p>
+                <p><strong>Visuals:</strong> Bloated, insectoid features, swarms of flies, decaying robes.</p>
+            </div>
+            <div class="role-card">
+                <h3>🧪 THE CORPSE-STITCHER (The Mender)</h3>
+                <p><strong>Lore Origin:</strong> Disgraced surgeons and necromancers who joined Varrick to experiment without ethical limits. They maintain the undead and heal the living monsters.</p>
+                <p><strong>RP Function:</strong> Medic/Support. You repair the Horde after battle, stitching flesh and bone back together.</p>
+                <p><strong>Visuals:</strong> Leather aprons, surgical tools, bone saws, vials of green fluid.</p>
+            </div>
+            <div class="role-card">
+                <h3>🩸 THE BLOOD-MAGUS (The Vitalist)</h3>
+                <p><strong>Lore Origin:</strong> Sorcerers obsessed with the power of "Vitalis Glass." They channel blood magic to buff allies or drain enemies.</p>
+                <p><strong>RP Function:</strong> Magic Support/DPS. You use blood rituals to empower the Orcs or weaken the Inquisition's resolve.</p>
+                <p><strong>Visuals:</strong> Red robes, crystal staves, floating blood orbs.</p>
+            </div>
+            <div class="role-card">
+                <h3>🗿 THE GARGOYLE (The Living Stone)</h3>
+                <p><strong>Lore Origin:</strong> Smaller statues animated by the same magic as the Stone Protectors, but built for speed and surveillance.</p>
+                <p><strong>RP Function:</strong> Scout/Messenger. You can perch on buildings and remain perfectly still until needed.</p>
+                <p><strong>Visuals:</strong> Stone skin, wings, grotesque features, moss patches.</p>
+            </div>
+            <div class="role-card">
+                <h3>🐺 THE GRAVE-HOUND (The Beast)</h3>
+                <p><strong>Lore Origin:</strong> Wolves that fed on the corpses of the battlefield and were mutated by the dark magic of the Spire.</p>
+                <p><strong>RP Function:</strong> Tracking/Attack Dog. You serve as a loyal companion to Orcs or Butlers, sniffing out spies.</p>
+                <p><strong>Visuals:</strong> Large wolf/direwolf model, exposed bone, glowing eyes.</p>
+            </div>
+
+            <h2>V. Restricted Roles (Application Only)</h2>
+            <div class="role-card" style="border-color: #ff3333; background: rgba(102, 0, 0, 0.1); box-shadow: 0 0 10px var(--accent-glow);">
+                <h3>🐲 THE DRAGON (Apex Predator)</h3>
+                <p><strong>Function:</strong> Mount/Aerial Unit. The ultimate symbol of power. Three exist: Malachor, Vorith, and Ignis.</p>
+            </div>
+            <div class="role-card" style="border-color: #ff3333; background: rgba(102, 0, 0, 0.1); box-shadow: 0 0 10px var(--accent-glow);">
+                <h3>🗿 ANCIENT STONE PROTECTOR (Construct)</h3>
+                <p><strong>Function:</strong> Indestructible Sentinel. Guardian of the Runics.</p>
+            </div>
+            <div class="role-card" style="border-color: #ff3333; background: rgba(102, 0, 0, 0.1); box-shadow: 0 0 10px var(--accent-glow);">
+                <h3>🦇 DESMODUS BAT (Mount/Aerial Unit)</h3>
+                <p><strong>Function:</strong> Aerial Superiority. Eyes in the night sky.</p>
+            </div>
+            <div class="role-card" style="border-color: #ff3333; background: rgba(102, 0, 0, 0.1); box-shadow: 0 0 10px var(--accent-glow);">
+                <h3>🔥 THE ASHEN VEIL (Elite Executioner)</h3>
+                <p><strong>Function:</strong> The Count's personal shadows. They answer to no one else.</p>
+            </div>
+
+            <!-- ENEMY FACTIONS - UPDATED -->
+            <h2>VI. THE ENEMY FACTIONS (Playable Antagonists)</h2>
+            <p><em>For those who wish to oppose the Sovereign.</em></p>
+
+            <div class="enemy-card">
+                <h3>✝️ THE INQUISITION OF THE WHITE SUN (The Holy Light)</h3>
+                <p><strong>Focus:</strong> Magical anti-undead warfare, fanaticism, and securing holy artifacts.</p>
+                
+                <h4 style="font-weight:bold; margin-top: 15px;">THE HOLY BULWARK (The Shield)</h4>
+                <p><strong>RP Function:</strong> Heavy infantry, using large shields and blessed armor to form defensive lines against the Horde.</p>
+                <p><strong>Visuals:</strong> Pristine white/gold plate armor, large kite shield, holy symbols.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">THE TEMPLAR (The Blade)</h4>
+                <p><strong>RP Function:</strong> Holy magic users and skilled swordsmen, specializing in exorcism and combat against the undead.</p>
+                <p><strong>Visuals:</strong> Chainmail, white tabard with a red cross, glowing sword or mace.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">THE FANATIC (The Torch)</h4>
+                <p><strong>RP Function:</strong> Shock troops wielding fire and burning oil, driven by zealotry against dark creatures.</p>
+                <p><strong>Visuals:</strong> Simple robes, leather armor, carrying torches, oil pitchers, and crucifixes.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">🕯️ THE CONFESSOR (The Question)</h4>
+                <p><strong>RP Function:</strong> Interrogation and Subversion. Extracts vital intelligence from captured Horde members (Goblins, Skinstealers) and attempts to convert or demoralize weak-willed mortals. They are the eyes and ears of High Inquisitor Karras within human society.</p>
+                <p><strong>Visuals:</strong> Simple, austere religious robes, hood or mask of silence, blessed water/oils, simple interrogation tools, a heavy bible/ledger.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">🧪 THE APOTHECARY (The Purifier)</h4>
+                <p><strong>RP Function:</strong> Battlefield Support and Alchemical Warfare. Operates the Monastery's laboratory to create silver-infused oils, garlic bombs, and potent anti-undead reagents. Also serves as a medic to heal the living.</p>
+                <p><strong>Visuals:</strong> White or stained linen robes, a utility apron, vials of glowing liquid, surgical tools, a face-mask to avoid contamination.</p>
+            </div>
+
+            <div class="enemy-card">
+                <h3>🛡️ THE IRON PACT MERCENARIES (The Professionals)</h3>
+                <p><strong>Focus:</strong> Practical, disciplined military combat, defense of fortified positions, and capturing bounties.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">THE CROSSBOWMAN (The Watch)</h4>
+                <p><strong>RP Function:</strong> Ranged fire support, focusing on sharpshooting, tower defense, and maintaining guard duty.</p>
+                <p><strong>Visuals:</strong> Simple leather and chain armor, thick crossbow, utility belt.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">THE PIKEMAN (The Wall)</h4>
+                <p><strong>RP Function:</strong> Line infantry, masters of formation holding, and counter-charging large beasts like Ogres.</p>
+                <p><strong>Visuals:</strong> Partial plate, helmet, long pike, disciplined formation movement.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">THE SCOUT (The Runner)</h4>
+                <p><strong>RP Function:</strong> Intelligence gathering, pathfinding, setting up ambushes, and intercepting the Horde's supply lines.</p>
+                <p><strong>Visuals:</strong> Light leather armor, hooded, carrying maps and lockpicks, small sword.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">💣 THE SABOTEUR (The Breaker)</h4>
+                <p><strong>RP Function:</strong> Siege Engineering and Demolitions. Responsible for constructing and maintaining siege equipment. Uses rudimentary explosives, sapping techniques, and traps (e.g., boiling oil, rockslides) to destroy the Horde's tunnels and fortifications.</p>
+                <p><strong>Visuals:</strong> Heavy, padded leather armor with metal patches, tools of the trade (hammers, pickaxes), carrying small pouches of "black powder," grim and pragmatic demeanor.</p>
+
+                <h4 style="font-weight:bold; margin-top: 15px;">🛡️ THE WAR-CAPTAIN (The Leader)</h4>
+                <p><strong>RP Function:</strong> Tactical Command and Field Coordination. A non-magical field officer who leads squads in combat, directs defensive fire, and handles high-level negotiations, bounties, and prisoner exchanges.</p>
+                <p><strong>Visuals:</strong> Well-maintained, practical steel plate armor (perhaps with a plume or colored sash for identification), a large, non-ornate broadsword or heavy mace, and a map/scroll tube for battle plans.</p>
+            </div>
+
+            <div class="enemy-card">
+                <h3>⚗️ THE SILVER HAND ALCHEMIST</h3>
+                <p><strong>Lore:</strong> A neutral researcher or merchant willing to trade with anyone for rare knowledge.</p>
+                <p><strong>Visuals:</strong> Robes, goggles, potion bandoliers, intricate mechanical tools.</p>
+            </div>
+            <div class="enemy-card">
+                <h3>🌑 THE PALE MOON VAMPIRE</h3>
+                <p><strong>Lore:</strong> A traditionalist vampire who opposes Varrick's solar ambition. They prefer the shadows.</p>
+                <p><strong>Visuals:</strong> Elegant, aristocratic clothing (black/purple), pale skin, subtle fangs.</p>
+            </div>
+            <!-- END UPDATED SECTION -->
+
+            <h2>The Experiments</h2>
+            <div class="role-card">
+                <h3>🧪 Alchemists</h3>
+                <p><strong>The Flesh-Molders</strong> - Mad scientists who create the abominations of war, from Rat Ogres to chemical weapons. They serve under Mendacius but pursue their own twisted research.</p>
+                <p><strong>Duties:</strong> Creating monsters, chemical warfare, biological weapons, experimental treatments.</p>
+            </div>
+
+            <div class="role-card">
+                <h3>⚰️ Necromancers</h3>
+                <p><strong>The Death-Callers</strong> - Masters of undeath who raise and command the fallen. They work with the Night Walkers to maintain the undead armies and perform dark rituals.</p>
+                <p><strong>Duties:</strong> Raising the dead, commanding undead units, dark rituals, maintaining the Teutonic Fallen.</p>
+            </div>
+
+            <h2>The Supporting Forces</h2>
+            <div class="role-card">
+                <h3>🔨 Siege Engineers</h3>
+                <p><strong>The Breakers</strong> - Craftsmen who design and build the war machines of the Horde. From trebuchets to battering rams, they create the tools that break castle walls.</p>
+                <p><strong>Duties:</strong> Building siege equipment, castle breaching, engineering support, demolitions.</p>
+            </div>
+
+            <div class="role-card">
+                <h3>⚔️ Weaponsmiths</h3>
+                <p><strong>The Iron-Forgers</strong> - Master blacksmiths who create the weapons and armor of the Horde. They work with Star-Metal and other rare materials to create weapons of war.</p>
+                <p><strong>Duties:</strong> Forging weapons, crafting armor, maintaining equipment, magical weapon creation.</p>
+            </div>
+
+            <div class="role-card">
+                <h3>📜 Scribes</h3>
+                <p><strong>The Keepers</strong> - Scholars and record-keepers who maintain the Crimson Bible, document the Count's plans, and preserve the knowledge of the Horde.</p>
+                <p><strong>Duties:</strong> Record-keeping, research, maintaining the Bible, translating ancient texts.</p>
+            </div>
+
+            <h2>Initiates and Recruits</h2>
+            <div class="role-card">
+                <h3>🔴 Initiates</h3>
+                <p><strong>The Blood-Bound</strong> - New members who have sworn loyalty to the Count but have yet to prove themselves. They undergo trials and training to earn their place in the Horde.</p>
+                <p><strong>Duties:</strong> Training, menial tasks, learning the ways of the Horde, proving loyalty.</p>
+            </div>
+
+            <div class="role-card">
+                <h3>⚫ Thralls</h3>
+                <p><strong>The Servants</strong> - Captured enemies or debtors who serve the Horde in exchange for their lives. They perform the dirtiest work and hope to one day earn their freedom or initiation.</p>
+                <p><strong>Duties:</strong> Labor, cleaning, dangerous tasks, serving as cannon fodder in desperate situations.</p>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>Advancement Path</h2>
+            <p><strong>Initiate → Specialized Division → Elite Rank → Inner Circle</strong></p>
+            <p>Advancement is based on loyalty, competence, and usefulness to the Count's grand design. The most promising members may be considered for the Ashen Veil or even higher positions within the command structure.</p>
+
+            <p style="text-align: center; font-style: italic; color: var(--accent-color);">Remember: Your rank is not just a title—it is your purpose in the coming darkness.</p>
+        </div>
+    </div>
+
+    <!-- SECTION: TEMPLATE -->
+    <div id="template" class="content-section">
+        <div class="parchment">
+            <h1>OC Template</h1>
+            <p style="text-align: center;"><em>Create your character for the Crimson Sovereignty</em></p>
+
+            <div class="template-box">
+<strong>=== BASIC INFORMATION ===</strong>
+
+Name: 
+Title/Nickname:
+Race: (Orc, Ogre, Goblin, Human, Vampire, or other)
+Age: 
+Gender:
+Appearance: (Detailed description, height, build, distinguishing features)
+Preferred attire/armour:
+
+<strong>=== BACKGROUND & LOYALTY ===</strong>
+
+Origin: (Where are you from? How did you join the Horde?)
+Former life: (What did you do before swearing to Varrick?)
+Reason for joining: (Why did you choose the Crimson path?)
+Loyalty level: (1-10, 10 being absolute devotion to the Count)
+ darkest secret: (Something that could be used against you)
+
+<strong>=== SKILLS & ABILITIES ===</strong>
+
+Primary role: (Warrior, Scout, Spy, Alchemist, etc.)
+Combat skills: (Weapons, fighting style, tactical knowledge)
+Non-combat skills: (Crafting, stealth, diplomacy, etc.)
+Magical abilities: (If any - limited to specific types)
+Weaknesses: (Flaws, fears, vulnerabilities)
+Special equipment: (Unique weapons, tools, artifacts)
+
+<strong>=== PSYCHOLOGICAL PROFILE ===</strong>
+
+Personality: (How they act, think, and interact)
+Alignment within the Horde: (Pragmatist, Zealot, Opportunist, etc.)
+Views on Varrick: (Fear, respect, worship, manipulation?)
+Views on the mission: (True believer, reluctant participant, etc.)
+Relationships: (Allies, rivals, dependents within the Horde)
+Mental state: (Stable, haunted, obsessive, etc.)
+
+<strong>=== ROLEPLAY DETAILS ===</strong>
+
+Typical behavior in the Spire: (How they act when not on missions)
+Battle cry or catchphrase: 
+Preferred type of mission: (Stealth, combat, espionage, etc.)
+How they handle failure: 
+How they handle success: 
+Personal goals beyond serving Varrick: (If any)
+
+<strong>=== LORE INTEGRATION ===</strong>
+
+Knowledge of the Runics: (How much do they know about the mission?)
+Opinion on other factions: (What do they think of Orcs, Goblins, etc?)
+History with the Inquisition: (Previous encounters or vendettas)
+Connection to the supernatural: (Vampire heritage, magical sensitivity, etc.)
+Role in the 800-year plan: (How do they see themselves in the grand scheme?)
+
+<strong>=== SAMPLE SCENARIOS ===</strong>
+
+Your character finds a weakened Inquisitor alone. What do you do?
+The Count orders you to sacrifice your closest ally for the mission. Your response?
+You discover a plot against Varrick from within the Horde. How do you proceed?
+A human settlement offers to surrender peacefully. Do you accept mercy or slaughter?
+
+<strong>=== CREATOR NOTES ===</strong>
+
+Player comfort level: (What content are you/aren't you comfortable with?)
+Preferred roleplay style: (Combat heavy, social, intrigue, etc.)
+Availability for events: 
+Character arc ideas: (Where do you see this character going?)
+Questions for the DM: 
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <p><strong>Instructions:</strong></p>
+                <p>1. Copy this template and fill in all sections</p>
+                <p>2. Be detailed but concise - quality over quantity</p>
+                <p>3. Keep your character balanced - every strength needs a weakness</p>
+                <p>4. Consider how your character fits into the Horde's structure</p>
+                <p>5. Submit to a Butler for review and approval</p>
+            </div>
+        </div>
+    </div>
+
+<!-- SECTION: CONTRIBUTE-->
+<div id="contribute" class="content-section">
+
+        <div class="parchment">
+            <h1>Chamber of Tribute</h1>
+            <p style="text-align: center; font-style: italic;">"To the Count, we give our all."</p>
+
+            <h2>Support the Crimson Conquest</h2>
+            <p>The path to darkness requires resources. Below you will find ways to support the continued operations of the Crimson Sovereignty and help Varrick's grand design come to fruition.</p>
+
+            <div class="role-card">
+                <h3>🔥 The Sun-Eater's Fund</h3>
+                <p><strong>Direct Support</strong> - Contributions to the Sun-Eater's Fund go directly toward maintaining our VRChat worlds, hosting events, and creating new content for the Horde.</p>
+                <p><strong>What your support provides:</strong></p>
+                <ul>
+                    <li>Custom VRChat world development</li>
+                    <li>Event hosting and organization</li>
+                    <li>Server maintenance for our digital infrastructure</li>
+                    <li>Art and asset creation for lore expansion</li>
+                </ul>
+                <p style="text-align: center; margin-top: 20px;">
+                    <a href="https://www.patreon.com/crimsonsovereignty" target="_blank" class="copy-btn" style="text-decoration: none;">BECOME A PATRON</a>
+                </p>
+            </div>
+
+            <div class="role-card">
+                <h3>⚔️ The Runic Forge</h3>
+                <p><strong>Creative Contributions</strong> - Artists, writers, musicians, and creators can contribute their talents to expand the Crimson Bible and bring the dark fantasy world to life.</p>
+                <p><strong>Ways to contribute creatively:</strong></p>
+                <ul>
+                    <li>Write tales for the Crimson Bible</li>
+                    <li>Create artwork of characters and locations</li>
+                    <li>Compose ambient music for the Spire</li>
+                    <li>Design costumes and avatar assets</li>
+                </ul>
+                <p style="text-align: center; margin-top: 20px;">
+                    <a href="https://discord.gg/dVZTK3Jdkn" target="_blank" class="copy-btn" style="text-decoration: none;">JOIN CREATIVE TEAM</a>
+                </p>
+            </div>
+
+            <div class="role-card">
+                <h3>🩸 The Blood Tithe</h3>
+                <p><strong>One-Time Contributions</strong> - For those who wish to make a single offering to support specific projects or events within the Crimson Sovereignty.</p>
+                <p><strong>Recent and upcoming projects:</strong></p>
+                <ul>
+                    <li>The Sun-Eater's Crucible world expansion</li>
+                    <li>Custom avatar creation for key characters</li>
+                    <li>Professional voice acting for key lore elements</li>
+                    <li>Animated sequences for major story events</li>
+                </ul>
+                <p style="text-align: center; margin-top: 20px;">
+                    <a href="#" onclick="alert('Contact a Butler directly in Discord for one-time contributions')" class="copy-btn" style="text-decoration: none;">MAKE OFFERING</a>
+                </p>
+            </div>
+
+            <h2>Tiers of Allegiance</h2>
+            <div class="enemy-card">
+                <h3>🟤 Iron-Blood Recruit ($5/month)</h3>
+                <p><strong>Benefits:</strong></p>
+                <ul>
+                    <li>Access to supporter-only Discord channel</li>
+                    <li>Voting on minor event decisions</li>
+                    <li>Special "Recruit" role in Discord</li>
+                    <li>Monthly lore updates</li>
+                </ul>
+            </div>
+
+            <div class="role-card">
+                <h3>⚫ Knight of the Shadow Court ($15/month)</h3>
+                <p><strong>Benefits:</strong></p>
+                <ul>
+                    <li>All previous benefits</li>
+                    <li>Early access to new content</li>
+                    <li>Input on major story developments</li>
+                    <li>Custom Discord role and color</li>
+                    <li>Invitation to supporter-only events</li>
+                </ul>
+            </div>
+
+            <div class="enemy-card">
+                <h3>🔴 The Inner Circle ($50/month)</h3>
+                <p><strong>Benefits:</strong></p>
+                <ul>
+                    <li>All previous benefits</li>
+                    <li>Direct influence on major plot decisions</li>
+                    <li>Personalized character integration</li>
+                    <li>One-on-one sessions with the DM</li>
+                    <li>Exclusive access to behind-the-scenes content</li>
+                    <li>Recognition in major events</li>
+                </ul>
+            </div>
+
+            <hr style="border: 0; border-top: 2px solid #5c4033; margin: 30px 0; box-shadow: 0 0 5px var(--accent-glow);">
+
+            <h2>The Count's Gratitude</h2>
+            <p>Every supporter, whether through coin or creativity, helps bring the eternal night closer. Your contributions fund the very mechanisms of our conquest and allow Varrick's 800-year plan to continue unfolding.</p>
+            
+            <p style="text-align: center; font-style: italic; color: var(--accent-color);">
+                "The Sun will fall. The Night will reign. And those who supported the darkness shall rule beside me when the shadows claim the world."<br>
+                — Count Varrick von Kaelen
+            </p>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <p><strong>Questions about contributing?</strong></p>
+                <p>Contact any Butler in the Discord or message the Count directly.</p>
+                <p>Your loyalty shall be remembered... and rewarded.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- SECTION: TRIBUTE -->
+<div id="tribute" class="content-section">
+
+    <div class="parchment">
+        <h1>Tributes of the Sovereignty</h1>
+        <p style="text-align:center; font-size:1.3em; font-style:italic;">
+            Honoring those who have strengthened the Spire through loyalty, action, and love.
+        </p>
+
+        <h2>Konfit — The Engaged Flame</h2>
+        <p>
+            Konfit stands as one of the most active and dedicated members to ever serve within the Spire.
+            Their presence, energy, reliability, and constant engagement have strengthened the community in a 
+            way few ever accomplish. This tab exists in part to acknowledge their unwavering loyalty, 
+            enthusiasm, and the impact they've made on the group as a whole.
+        </p>
+
+        <h2>Nameless Star — Pillar of Guidance</h2>
+        <p>
+            A special thanks is owed to Nameless Star, whose assistance, leadership, and support in helping 
+            manage and run the group has been invaluable. Their effort behind the scenes and their clarity 
+            during moments of decision have ensured the Sovereignty remains strong, organized, and united.
+        </p>
+
+        <hr style="border:0; border-top:2px solid #5c4033; margin:40px 0; box-shadow:0 0 5px var(--accent-glow);">
+
+        <h2>In Loving Memory — Venus</h2>
+        <p style="font-style:italic;">
+            A beloved companion. A gentle presence. A life that left an echo.
+
+Venus was more than a pet — she was comfort, warmth, and quiet loyalty made real. A soft heartbeat in a world that can be unbearably loud. Her presence brought peace, her companionship brought joy, and her absence leaves a space that cannot truly be filled.
+
+This tribute stands as a candle for her — a light in memory of a life that mattered deeply.
+
+The world feels a little emptier without Venus in it, but remembering her fills that space with something softer: gratitude.
+For every moment shared.
+For every small joy.
+For the love she carried and the love she gave.
+
+Though she is gone, her memory remains woven into the life she touched.
+This world — both real and imagined — remembers her.
+
+🕯️ May this candle burn in her name.
+🕯️ May she rest in peace.
+        </p>
+
+        <p style="text-align:center; margin-top:40px; font-size:1.2em; color:#4a0404; font-family:'Cinzel',serif;">
+            “Rest well, Venus. You were loved, and always will be.”
+        </p>
+    </div>
+</div>
+<footer>
+    The Crimson Sovereignty &copy; 2025. Bound by Blood and Shadow.<br>
+    <a href="https://discord.gg/dVZTK3Jdkn" style="color: #8b5a2b; text-decoration: none;">Join the Discord</a>
+</footer>
+
+<script>
+    // SECTION NAVIGATION
+    function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+        
+        // Show selected section
+        document.getElementById(sectionId).classList.add('active');
+        
+        // Update navigation active state
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => link.classList.remove('active'));
+        document.getElementById('nav-' + sectionId).classList.add('active');
+    }
+
+    // MUSIC TOGGLE FUNCTION
+    let musicPlaying = true;
+    function toggleMusic() {
+        const audio = document.getElementById('background-music');
+        const button = document.querySelector('#tribute-bell-toggle button');
+        
+        if (musicPlaying) {
+            audio.pause();
+            button.textContent = '🔊 Background Music';
+            musicPlaying = false;
+        } else {
+            audio.play();
+            button.textContent = '🔇 Background Music';
+            musicPlaying = true;
+        }
+    }
+
+    // MOBILE MENU FUNCTIONS
+    function toggleMobileMenu() {
+        const nav = document.querySelector('nav');
+        const overlay = document.getElementById('mobile-overlay');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        
+        nav.classList.toggle('active');
+        overlay.classList.toggle('active');
+        toggle.classList.toggle('active');
+        
+        // Change icon based on menu state
+        if (nav.classList.contains('active')) {
+            toggle.innerHTML = '✕';
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = 'hidden';
+        } else {
+            toggle.innerHTML = '☰';
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Close mobile menu when clicking on a navigation link
+    document.addEventListener('DOMContentLoaded', function() {
+        const navLinks = document.querySelectorAll('nav ul li a, nav ul li button');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const nav = document.querySelector('nav');
+                const overlay = document.getElementById('mobile-overlay');
+                const toggle = document.getElementById('mobile-menu-toggle');
+                
+                if (window.innerWidth <= 768) {
+                    nav.classList.remove('active');
+                    overlay.classList.remove('active');
+                    toggle.classList.remove('active');
+                    toggle.innerHTML = '☰';
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    });
+
+    // VOLUME CONTROL FUNCTIONS
+    const bgVideo = document.getElementById('bg-video');
+    const backgroundMusic = document.getElementById('background-music');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
+    const volumeIcon = document.getElementById('volume-icon');
+    let isMuted = false;
+    let previousVolume = 30;
+
+    function changeVolume(value) {
+        const volume = value / 100;
+        bgVideo.volume = volume;
+        backgroundMusic.volume = volume;
+        volumeValue.textContent = value + '%';
+        
+        // Update icon based on volume
+        if (value == 0) {
+            volumeIcon.textContent = '🔇';
+            volumeIcon.classList.add('muted');
+        } else if (value < 50) {
+            volumeIcon.textContent = '🔉';
+            volumeIcon.classList.remove('muted');
+        } else {
+            volumeIcon.textContent = '🔊';
+            volumeIcon.classList.remove('muted');
+        }
+        
+        isMuted = false;
+    }
+
+    function toggleMute() {
+        if (isMuted) {
+            // Unmute
+            bgVideo.volume = previousVolume / 100;
+            backgroundMusic.volume = previousVolume / 100;
+            volumeSlider.value = previousVolume;
+            volumeValue.textContent = previousVolume + '%';
+            
+            // Update icon
+            if (previousVolume < 50) {
+                volumeIcon.textContent = '🔉';
+            } else {
+                volumeIcon.textContent = '🔊';
+            }
+            volumeIcon.classList.remove('muted');
+            isMuted = false;
+        } else {
+            // Mute
+            previousVolume = volumeSlider.value;
+            bgVideo.volume = 0;
+            backgroundMusic.volume = 0;
+            volumeSlider.value = 0;
+            volumeValue.textContent = '0%';
+            volumeIcon.textContent = '🔇';
+            volumeIcon.classList.add('muted');
+            isMuted = true;
+        }
+    }
+
+    // Initialize volume on page load
+    window.addEventListener('load', function() {
+        // Set initial volume
+        changeVolume(30);
+        
+        // Ensure video plays with user interaction (browser requirement)
+        document.addEventListener('click', function initAudio() {
+            bgVideo.play().catch(e => console.log('Video autoplay prevented:', e));
+            backgroundMusic.play().catch(e => console.log('Audio autoplay prevented:', e));
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+    });
+
+    // COPY TEMPLATE FUNCTION
+    function copyTemplate() {
+        const templateText = document.querySelector('.template-box').innerText;
+        navigator.clipboard.writeText(templateText).then(function() {
+            alert('Template copied to clipboard!');
+        });
+    }
+
+    // EMBER CANVAS ANIMATION
+    const canvas = document.getElementById('ember-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    class Ember {
+        constructor() {
+            this.reset();
+        }
+        
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height + 10;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = -Math.random() * 2 - 1;
+            this.size = Math.random() * 3 + 1;
+            this.life = 1;
+            this.decay = Math.random() * 0.01 + 0.005;
+            this.color = `hsl(${Math.random() * 60}, 100%, 50%)`; // Red to yellow range
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life -= this.decay;
+            
+            if (this.life <= 0 || this.y < -10) {
+                this.reset();
+            }
+        }
+        
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+    
+    const embers = [];
+    for (let i = 0; i < 50; i++) {
+        embers.push(new Ember());
+    }
+    
+    function animateEmbers() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        embers.forEach(ember => {
+            ember.update();
+            ember.draw();
+        });
+        
+        requestAnimationFrame(animateEmbers);
+    }
+    
+    animateEmbers();
+
+</script>
+<script>
+document.querySelectorAll('.map-hotspot').forEach(hs => {
+  hs.addEventListener('click', () => {
+    const name = hs.dataset.name;
+
+    const descriptions = {
+      "The Spire": "A massive obsidian tower at the heart of the continent, surrounded by eternal mist...",
+      "Prism Chamber": "A suspended chamber of refracted scarlet light attached to the Spire...",
+      "Great Hearth": "A grand hall of fire, banners, and stone — the center of social life...",
+      "Blackwood Forest": "A vast sea of black trees twisting in unnatural fog...",
+      "Ruined Chapel of St. Ilias": "A collapsed holy site overtaken by vines and glowing fungi...",
+      "Sun-Eater's Crucible": "A volcanic hollow of blood-red stone and ritual flame...",
+      "Iron Pass": "A narrow canyon filled with iron-rich cliffs and mercenary outposts...",
+      "Monastery of the White Sun": "A blinding white fortress of the Inquisition atop the cliffs...",
+      "Silver Market": "A vibrant, moonlit trade city where cultists walk among merchants..."
+    };
+
+    document.getElementById('map-info-title').textContent = name;
+    document.getElementById('map-info-text').textContent = descriptions[name] || "No description available.";
+    document.getElementById('map-info-panel').classList.add('show');
+  });
+});
+
+// Close panel
+document.getElementById('map-info-close').addEventListener('click', () => {
+  document.getElementById('map-info-panel').classList.remove('show');
+});
+</script>
+
+</body>
+</html>
